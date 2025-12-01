@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import Alert from './components/Alert'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Login from './pages/Login'
@@ -60,6 +60,11 @@ function AppContent() {
 }
 
 function App() {
+  try {
+    console.log('App component render - reactVersion:', React?.version)
+  } catch (e) {
+    console.log('App: erro ao logar versão do React', e)
+  }
   return (
     <AuthProvider>
       <AppContent />
