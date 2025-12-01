@@ -39,9 +39,16 @@ self.addEventListener('activate', (event) => {
 
 // Interceptação de requisições
 self.addEventListener('fetch', (event) => {
+  const request = event.request
+  const requestUrl = new URL(request.url)
+
+  // Excluir requisições externas (ex: Supabase) - deixar passar direto para a rede
+  if (requestUrl.origin !== self.location.origin) {
+    return
+  }
+
   // Para requisições de navegação (HTML) usamos network-first para evitar
   // servir um index.html antigo quando uma nova versão está disponível.
-  const request = event.request
   const acceptHeader = request.headers.get('accept') || ''
 
   if (request.mode === 'navigate' || acceptHeader.includes('text/html')) {
