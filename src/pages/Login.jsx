@@ -19,7 +19,12 @@ export default function Login({ showAlert }) {
         .replace(/^(\d{2})(\d)/g, '($1) $2')
         .replace(/(\d{5})(\d)/, '$1-$2')
     }
-    return telefone
+
+    // Se ultrapassar, recorta para os 11 primeiros dígitos e formata
+    const trimmed = numbers.slice(0, 11)
+    return trimmed
+      .replace(/^(\d{2})(\d)/g, '($1) $2')
+      .replace(/(\d{5})(\d)/, '$1-$2')
   }
 
   const handleSubmit = async (e) => {

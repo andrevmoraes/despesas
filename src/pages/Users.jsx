@@ -40,13 +40,18 @@ export default function Users({ showAlert }) {
 
   const formatarTelefone = (value) => {
     const numbers = value.replace(/\D/g, '')
-    
+
     if (numbers.length <= 11) {
       return numbers
         .replace(/^(\d{2})(\d)/g, '($1) $2')
         .replace(/(\d{5})(\d)/, '$1-$2')
     }
-    return formData.telefone
+
+    // Mantém apenas os 11 primeiros dígitos e formata
+    const trimmed = numbers.slice(0, 11)
+    return trimmed
+      .replace(/^(\d{2})(\d)/g, '($1) $2')
+      .replace(/(\d{5})(\d)/, '$1-$2')
   }
 
   const handleSubmit = async (e) => {

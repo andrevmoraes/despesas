@@ -1,12 +1,12 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { supabase } from '../services/supabase'
 
-const AuthContext = createContext({})
+const AuthContext = createContext(null)
 
 export const useAuth = () => {
   const context = useContext(AuthContext)
   if (!context) {
-    throw new Error('useAuth must be used within AuthProvider')
+    throw new Error('useAuth deve ser usado dentro de AuthProvider')
   }
   return context
 }
