@@ -1,4 +1,5 @@
-const CACHE_NAME = 'cobranca-v1'
+// Atualize a versão ao alterar a estratégia de cache
+const CACHE_NAME = 'cobranca-v2'
 const urlsToCache = [
   '/',
   '/index.html',
@@ -14,6 +15,8 @@ self.addEventListener('install', (event) => {
         return cache.addAll(urlsToCache)
       })
   )
+  // Pede para ativar este SW imediatamente sem aguardar páginas fecharem
+  self.skipWaiting()
 })
 
 // Ativação do service worker
@@ -30,38 +33,47 @@ self.addEventListener('activate', (event) => {
       )
     })
   )
+  // Assume o controle das páginas imediatamente após ativação
+  self.clients && self.clients.claim()
 })
 
 // Interceptação de requisições
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Cache hit - retorna da cache
-        if (response) {
-          return response
-        }
-        
-        // Clone da requisição
-        const fetchRequest = event.request.clone()
-        
-        return fetch(fetchRequest).then((response) => {
-          // Verifica se recebeu uma resposta válida
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response
+  // Para requisições de navegação (HTML) usamos network-first para evitar
+  // servir um index.html antigo quando uma nova versão está disponível.
+  const request = event.request
+  const acceptHeader = request.headers.get('accept') || ''
+
+  if (request.mode === 'navigate' || acceptHeader.includes('text/html')) {
+    event.respondWith(
+      fetch(request)
+        .then((networkResponse) => {
+          // Atualiza cache com a versão mais recente do HTML
+          if (networkResponse && networkResponse.status === 200) {
+            const copy = networkResponse.clone()
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy))
           }
-          
-          // Clone da resposta
-          const responseToCache = response.clone()
-          
-          caches.open(CACHE_NAME)
-            .then((cache) => {
-              cache.put(event.request, responseToCache)
-            })
-          
-          return response
+          return networkResponse
         })
+        .catch(() => caches.match('/index.html'))
+    )
+    return
+  }
+
+  // Para outros recursos, priorizamos cache-first para performance
+  event.respondWith(
+    caches.match(request).then((response) => {
+      if (response) return response
+      return fetch(request.clone()).then((networkResponse) => {
+        // Só cacheia respostas válidas
+        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+          return networkResponse
+        }
+        const responseToCache = networkResponse.clone()
+        caches.open(CACHE_NAME).then((cache) => cache.put(request, responseToCache))
+        return networkResponse
       })
+    })
   )
 })
 
