@@ -82,7 +82,7 @@ export const verificarCobrancasHoje = async (user, supabase) => {
       const estaNaDivisao = streaming.divisoes.some(d => d.user_id === user.id)
       if (estaNaDivisao) {
         notificacoes.push({
-          titulo: '💸 Você deve pagar hoje!',
+          titulo: '💸 Você tem despesas para acertar hoje!',
           opcoes: {
             body: `${streaming.nome}: R$ ${valorPorPessoa.toFixed(2)} para ${streaming.pagador.nome}`,
             icon: '/icon-192.svg',
@@ -96,7 +96,7 @@ export const verificarCobrancasHoje = async (user, supabase) => {
 
     return notificacoes
   } catch (error) {
-    console.error('Erro ao verificar cobranças:', error)
+    console.error('Erro ao verificar despesas:', error)
     return []
   }
 }

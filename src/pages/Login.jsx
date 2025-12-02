@@ -69,7 +69,7 @@ export default function Login({ showAlert }) {
           marginBottom: 'var(--spacing-lg)',
           color: 'var(--primary)'
         }}>
-          cobrança
+          despesas
         </h1>
         
         <form onSubmit={handleSubmit}>

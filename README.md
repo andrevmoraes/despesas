@@ -1,8 +1,8 @@
-## Cobrança — Streamings (PWA)
+## Despesas Compartilhadas — Gerenciador PWA
 
-Aplicação PWA para gerenciar cobranças de serviços de streaming compartilhados entre amigos. Permite cadastrar serviços, definir quem paga, dividir valores (igual ou personalizado) e visualizar saldos por usuário.
+Aplicação PWA para gerenciar despesas compartilhadas entre amigos. Permite cadastrar serviços, definir quem paga, dividir valores (igual ou personalizado) e visualizar saldos por usuário.
 
-**Objetivo:** facilitar o controle de custos compartilhados de assinaturas e prover uma interface leve, offline-capable e instalável.
+**Objetivo:** facilitar o controle de despesas compartilhadas entre amigos e prover uma interface leve, offline-capable e instalável.
 
 ---
 

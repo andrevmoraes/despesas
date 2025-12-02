@@ -1,7 +1,7 @@
 {
-  "name": "Cobrança - Streamings",
-  "short_name": "Cobrança",
-  "description": "Gerencie cobranças de streamings compartilhados",
+  "name": "Despesas Compartilhadas",
+  "short_name": "Despesas",
+  "description": "Gerencie despesas compartilhadas entre amigos",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",

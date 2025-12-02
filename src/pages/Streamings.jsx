@@ -268,7 +268,7 @@ export default function Streamings({ showAlert }) {
               </div>
               
               <div style={{ marginTop: 'var(--spacing-md)', fontSize: '0.875rem' }}>
-                <div>Dia da cobrança: {streaming.dia_cobranca}</div>
+                <div>Dia da despesa: {streaming.dia_cobranca}</div>
                 <div style={{ marginTop: 'var(--spacing-xs)' }}>
                   Dividido com: {streaming.divisoes.length > 0 
                     ? streaming.divisoes.map(d => d.user.nome).join(', ')
@@ -347,7 +347,7 @@ export default function Streamings({ showAlert }) {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Dia da Cobrança</label>
+                <label className="form-label">Dia da Despesa</label>
                 <input
                   type="number"
                   min="1"

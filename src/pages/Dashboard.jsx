@@ -25,7 +25,7 @@ export default function Dashboard({ showAlert }) {
     const nomePessoa = saldo.pessoa?.nome || 'Pessoa'
     const linhas = []
 
-    linhas.push('Resumo das assinaturas compartilhadas', '')
+    linhas.push('Resumo das despesas compartilhadas', '')
 
     // Assinaturas pagas por você (a outra pessoa)
     const porVoce = (saldo.breakdown || []).filter(d => d.tipo === 'você_deve')
@@ -242,7 +242,7 @@ export default function Dashboard({ showAlert }) {
       })
       showAlert(`${listaNotificacoes.length} notificação(ões) encontrada(s) para hoje!`, 'success')
     } else {
-      showAlert('Notificações ativadas! Você será avisado no dia das cobranças.', 'success')
+        showAlert('Notificações ativadas! Você será avisado nas datas das despesas.', 'success')
     }
 
     if (intervaloNotificacoesRef.current) {
@@ -465,7 +465,7 @@ export default function Dashboard({ showAlert }) {
             Olá, {user.nome}
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9375rem' }}>
-            Aqui está um resumo das suas cobranças
+            Aqui está um resumo das suas despesas compartilhadas
           </p>
         </div>
         <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
@@ -473,7 +473,7 @@ export default function Dashboard({ showAlert }) {
             <button 
               onClick={ativarNotificacoes} 
               className="btn btn--accent btn--small"
-              title="Receba lembretes no dia das cobranças"
+              title="Receba lembretes no dia das despesas"
             >
               🔔 Ativar Notificações
             </button>
