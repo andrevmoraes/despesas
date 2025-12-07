@@ -239,140 +239,142 @@ function Streamings({ showAlert }) {
           </Button>
         </div>
 
-        {/* Table Card */}
-        <Card>
-          <CardHeader className="space-y-2 p-6">
-            <CardTitle className="text-xl">Lista de Assinaturas</CardTitle>
-            <CardDescription className="text-base">
-              Gerencie suas assinaturas e despesas compartilhadas
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-0">
-            {streamings.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
-                <div className="mb-4 rounded-full bg-gray-100 p-4">
-                  <DollarSign className="h-8 w-8 text-gray-400" />
-                </div>
-                <h3 className="mb-2 text-lg font-medium text-gray-900">Nenhuma assinatura cadastrada</h3>
-                <p className="mb-4 text-sm text-gray-500">
-                  Comece adicionando sua primeira assinatura
-                </p>
-                <Button onClick={abrirNovo} variant="outline">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Adicionar Assinatura
-                </Button>
+        {/* Cards Grid */}
+        {streamings.length === 0 ? (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="mb-4 rounded-full bg-gray-100 p-4">
+                <DollarSign className="h-8 w-8 text-gray-400" />
               </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-b">
-                      <TableHead className="px-6">Nome</TableHead>
-                      <TableHead className="px-4">Valor</TableHead>
-                      <TableHead className="px-4 text-right">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {streamings.map((streaming) => (
-                      <TableRow key={streaming.id} className="h-20 border-b hover:bg-gray-50">
-                        <TableCell className="px-6 py-5">
-                          <div className="space-y-1">
-                            <div className="font-semibold text-base text-gray-900">{streaming.nome}</div>
-                            <div className="flex items-center gap-2 text-sm text-gray-500">
-                              <User className="h-4 w-4" />
-                              <span>{streaming.pagador?.nome}</span>
-                              <span className="text-gray-300">•</span>
-                              <Calendar className="h-4 w-4" />
-                              <span>Dia {streaming.dia_cobranca}</span>
-                            </div>
-                            {streaming.divisoes && streaming.divisoes.length > 0 && (
-                              <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                                <Users className="h-3.5 w-3.5" />
-                                <span>Dividida com {streaming.divisoes.length} pessoa{streaming.divisoes.length !== 1 ? 's' : ''}</span>
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="px-4 py-5">
-                          <Badge variant="secondary" className="gap-1 font-mono text-sm px-3 py-1.5">
-                            R$ {Number(streaming.valor_total || 0).toFixed(2)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="px-4 py-5 text-right">
-                          <div className="flex justify-end gap-3">
-                            <Button 
-                              onClick={() => abrirEdicao(streaming)}
-                              variant="ghost"
-                              size="icon"
-                              className="h-11 w-11 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                            >
-                              <Pencil className="h-5 w-5 text-gray-600" />
-                            </Button>
-                            <Button 
-                              onClick={() => deletarStreaming(streaming.id)}
-                              variant="ghost"
-                              size="icon"
-                              className="h-11 w-11 rounded-lg border border-red-200 hover:border-red-300 hover:bg-red-50"
-                            >
-                              <Trash2 className="h-5 w-5 text-red-500" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              <h3 className="mb-2 text-lg font-medium text-gray-900">Nenhuma assinatura cadastrada</h3>
+              <p className="mb-6 text-sm text-gray-500">
+                Comece adicionando sua primeira assinatura
+              </p>
+              <Button onClick={abrirNovo} className="h-12 px-6">
+                <Plus className="mr-2 h-5 w-5" />
+                Adicionar Assinatura
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {streamings.map((streaming) => (
+              <Card 
+                key={streaming.id}
+                className="group cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] border-2"
+                onClick={() => abrirEdicao(streaming)}
+              >
+                <CardContent className="p-6 space-y-4">
+                  {/* Header */}
+                  <div className="space-y-2">
+                    <div className="flex items-start justify-between gap-3">
+                      <h3 className="font-semibold text-lg text-gray-900 line-clamp-1 group-hover:text-blue-600 transition-colors">
+                        {streaming.nome}
+                      </h3>
+                      <Badge variant="secondary" className="font-mono text-sm px-2.5 py-1 shrink-0">
+                        R$ {Number(streaming.valor_total || 0).toFixed(2)}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Info */}
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <User className="h-4 w-4 shrink-0" />
+                      <span className="truncate">{streaming.pagador?.nome}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Calendar className="h-4 w-4 shrink-0" />
+                      <span>Cobrança dia {streaming.dia_cobranca}</span>
+                    </div>
+
+                    {streaming.divisoes && streaming.divisoes.length > 0 && (
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <Users className="h-4 w-4 shrink-0" />
+                        <span>Dividida com {streaming.divisoes.length} pessoa{streaming.divisoes.length !== 1 ? 's' : ''}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Delete Button */}
+                  <div className="pt-2 border-t">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full text-red-500 hover:text-red-700 hover:bg-red-50"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        deletarStreaming(streaming.id)
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Excluir
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Modal */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent onClose={() => setShowModal(false)}>
-          <DialogHeader>
-            <DialogTitle>
+        <DialogContent onClose={() => setShowModal(false)} className="max-w-lg">
+          <DialogHeader className="space-y-3 pb-6 border-b">
+            <DialogTitle className="text-2xl">
               {editando ? 'Editar Assinatura' : 'Nova Assinatura'}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-base">
               {editando 
-                ? 'Atualize as informações da assinatura abaixo' 
-                : 'Preencha as informações para criar uma nova assinatura'
+                ? 'Atualize as informações da assinatura' 
+                : 'Preencha os dados para criar uma nova assinatura'
               }
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6 pt-6">
+            {/* Nome */}
             <div className="space-y-3">
-              <Label htmlFor="nome" className="text-base font-medium">Nome da Assinatura</Label>
+              <Label htmlFor="nome" className="text-base font-semibold text-gray-700">
+                Nome da Assinatura
+              </Label>
               <Input
                 id="nome"
-                placeholder="Netflix, Spotify, etc."
+                placeholder="Ex: Netflix, Spotify, Disney+"
                 value={formData.nome}
                 onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                className="h-12 text-base border-gray-300"
+                className="h-14 text-base border-2 border-gray-200 focus:border-blue-500 transition-colors"
                 required
               />
             </div>
 
+            {/* Valor e Dia */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-3">
-                <Label htmlFor="valor" className="text-base font-medium">Valor Mensal (R$)</Label>
-                <Input
-                  id="valor"
-                  type="number"
-                  step="0.01"
-                  placeholder="39.90"
-                  value={formData.valor_total}
-                  onChange={(e) => setFormData({ ...formData, valor_total: e.target.value })}
-                  className="h-12 text-base border-gray-300"
-                  required
-                />
+                <Label htmlFor="valor" className="text-base font-semibold text-gray-700">
+                  Valor Mensal
+                </Label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">R$</span>
+                  <Input
+                    id="valor"
+                    type="number"
+                    step="0.01"
+                    placeholder="39.90"
+                    value={formData.valor_total}
+                    onChange={(e) => setFormData({ ...formData, valor_total: e.target.value })}
+                    className="h-14 text-base pl-12 border-2 border-gray-200 focus:border-blue-500 transition-colors"
+                    required
+                  />
+                </div>
               </div>
 
               <div className="space-y-3">
-                <Label htmlFor="dia" className="text-base font-medium">Dia da Cobrança</Label>
+                <Label htmlFor="dia" className="text-base font-semibold text-gray-700">
+                  Dia da Cobrança
+                </Label>
                 <Input
                   id="dia"
                   type="number"
@@ -381,19 +383,22 @@ function Streamings({ showAlert }) {
                   placeholder="15"
                   value={formData.dia_cobranca}
                   onChange={(e) => setFormData({ ...formData, dia_cobranca: e.target.value })}
-                  className="h-12 text-base border-gray-300"
+                  className="h-14 text-base border-2 border-gray-200 focus:border-blue-500 transition-colors"
                   required
                 />
               </div>
             </div>
 
+            {/* Pagador */}
             <div className="space-y-3">
-              <Label htmlFor="pagador" className="text-base font-medium">Quem paga?</Label>
+              <Label htmlFor="pagador" className="text-base font-semibold text-gray-700">
+                Quem paga?
+              </Label>
               <select
                 id="pagador"
                 value={formData.pagador_id}
                 onChange={(e) => setFormData({ ...formData, pagador_id: e.target.value })}
-                className="flex h-12 w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-950"
+                className="flex h-14 w-full rounded-md border-2 border-gray-200 bg-white px-4 text-base shadow-sm transition-colors focus:border-blue-500 focus:outline-none"
                 required
               >
                 {users.map(u => (
@@ -402,46 +407,50 @@ function Streamings({ showAlert }) {
               </select>
             </div>
 
+            {/* Divisões */}
             <div className="space-y-3">
-              <Label className="text-base font-medium">Dividir com:</Label>
-              <div className="space-y-3 rounded-lg border-2 border-gray-200 bg-gray-50 p-4">
+              <Label className="text-base font-semibold text-gray-700">
+                Dividir com:
+              </Label>
+              <div className="rounded-xl border-2 border-gray-200 bg-gray-50 p-4 space-y-2 max-h-48 overflow-y-auto">
                 {users
                   .filter(u => u.id !== formData.pagador_id)
                   .map(u => (
-                    <div key={u.id} className="flex items-center space-x-3 py-2 px-2 rounded-md hover:bg-white transition-colors">
+                    <label 
+                      key={u.id} 
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-white transition-colors cursor-pointer"
+                    >
                       <input
-                        id={`user-${u.id}`}
                         type="checkbox"
                         checked={formData.divisoes.includes(u.id)}
                         onChange={() => toggleDivisao(u.id)}
-                        className="h-5 w-5 rounded border-gray-400 cursor-pointer"
+                        className="h-5 w-5 rounded border-2 border-gray-300 cursor-pointer"
                       />
-                      <Label htmlFor={`user-${u.id}`} className="cursor-pointer font-normal text-base flex-1">
-                        {u.nome}
-                      </Label>
-                    </div>
+                      <span className="text-base text-gray-700">{u.nome}</span>
+                    </label>
                   ))}
                 {users.filter(u => u.id !== formData.pagador_id).length === 0 && (
-                  <p className="text-base text-gray-500 text-center py-2">Nenhum outro usuário disponível</p>
+                  <p className="text-base text-gray-500 text-center py-4">Nenhum outro usuário disponível</p>
                 )}
               </div>
             </div>
 
-            <div className="flex gap-4 pt-6 border-t border-gray-200">
+            {/* Botões */}
+            <div className="flex gap-4 pt-6 border-t-2">
               <Button 
                 type="button"
                 variant="outline"
                 onClick={() => setShowModal(false)}
-                className="flex-1 h-12 text-base border-2"
+                className="flex-1 h-14 text-base border-2 hover:bg-gray-50"
               >
                 Cancelar
               </Button>
               <Button 
                 type="submit"
                 disabled={loading}
-                className="flex-1 h-12 text-base"
+                className="flex-1 h-14 text-base bg-blue-600 hover:bg-blue-700"
               >
-                {loading ? 'Salvando...' : 'Salvar'}
+                {loading ? 'Salvando...' : editando ? 'Atualizar' : 'Criar'}
               </Button>
             </div>
           </form>

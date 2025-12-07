@@ -3,10 +3,34 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../services/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import * as notificacoes from '../services/notificacoes'
-import { MetroTile, MetroButton, MetroStatsCard } from '@andrevmoraes/metro-ui'
-import { MetroColors } from '@andrevmoraes/metro-ui'
 import DashboardSkeleton from '../components/DashboardSkeleton'
 import '../styles/dashboard.css'
+
+// Metro UI Colors
+const MetroColors = {
+  blue: '#0078D7',
+  darkBlue: '#005A9E',
+  green: '#10b981',
+  red: '#ef4444'
+}
+
+// Metro Tile Component
+const MetroTile = ({ color, size, hoverable = true, onClick, children, style }) => {
+  const sizeClasses = {
+    medium: 'metro-tile-medium',
+    wide: 'metro-tile-wide'
+  }
+  
+  return (
+    <div 
+      className={`metro-tile ${sizeClasses[size] || ''} ${hoverable ? 'metro-tile-hoverable' : ''}`}
+      onClick={onClick}
+      style={{ backgroundColor: color, ...style }}
+    >
+      {children}
+    </div>
+  )
+}
 
 function Dashboard({ showAlert }) {
   const { user, logout } = useAuth()
@@ -721,7 +745,7 @@ function Dashboard({ showAlert }) {
                           fontSize: '1.25rem',
                           color: 'white',
                           fontWeight: 300
-                        }}>R$ {totalRecebendo.toFixed(2)}</span>
+                        }}>R$ {totalRecebendo.toFixed(2).replace('.', ',')}</span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ 
@@ -734,7 +758,7 @@ function Dashboard({ showAlert }) {
                           fontSize: '1.25rem',
                           color: 'white',
                           fontWeight: 300
-                        }}>R$ {totalDevendo.toFixed(2)}</span>
+                        }}>R$ {totalDevendo.toFixed(2).replace('.', ',')}</span>
                       </div>
                       <div style={{ 
                         display: 'flex', 
@@ -754,7 +778,7 @@ function Dashboard({ showAlert }) {
                           fontSize: '1.5rem',
                           color: 'white',
                           fontWeight: 600
-                        }}>R$ {(totalRecebendo - totalDevendo).toFixed(2)}</span>
+                        }}>R$ {(totalRecebendo - totalDevendo).toFixed(2).replace('.', ',')}</span>
                       </div>
                     </div>
                   </div>
@@ -799,7 +823,11 @@ function Dashboard({ showAlert }) {
             return (
               <React.Fragment key={saldo.pessoa.id}>
                 <div onClick={() => setExpandedId(isExpanded ? null : saldo.pessoa.id)}>
-                  <MetroTile color={MetroColors.blue} size="medium">
+                  <MetroTile color={MetroColors.blue} size="medium" style={{ 
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between'
+                  }}>
                     <div>
                       <h2 style={{ 
                         fontFamily: 'Segoe UI, sans-serif',
@@ -831,9 +859,11 @@ function Dashboard({ showAlert }) {
                       fontFamily: 'Segoe UI, sans-serif',
                       fontSize: '2rem',
                       fontWeight: 300,
-                      color: 'rgba(255, 255, 255, 0.2)'
+                      color: 'rgba(255, 255, 255, 0.2)',
+                      marginTop: 'auto',
+                      alignSelf: 'flex-end'
                     }}>
-                      {saldo.pagoEsseMes ? '' : `R$ ${Math.abs(saldo.valor).toFixed(2)}`}
+                      {saldo.pagoEsseMes ? '' : `R$ ${Math.abs(saldo.valor).toFixed(2).replace('.', ',')}`}
                     </div>
                   </MetroTile>
                 </div>
@@ -1053,7 +1083,7 @@ function Dashboard({ showAlert }) {
                                   fontSize: '0.8rem', 
                                   color: '#6b7280'
                                 }}>
-                                  Total: R$ {total.toFixed(2)} ÷ {count} perfis = R$ {perPerson.toFixed(2)}
+                                  Total: R$ {total.toFixed(2).replace('.', ',')} ÷ {count} perfis = R$ {perPerson.toFixed(2).replace('.', ',')}
                                 </div>
                               </div>
                               <div style={{ 
@@ -1061,7 +1091,7 @@ function Dashboard({ showAlert }) {
                                 fontSize: '1.1rem',
                                 color: d.tipo === 'deve_para_voce' ? '#10b981' : '#ef4444' 
                               }}>
-                                {sign} R$ {perPerson.toFixed(2)}
+                                {sign} R$ {perPerson.toFixed(2).replace('.', ',')}
                               </div>
                             </li>
                           )
@@ -1102,7 +1132,7 @@ function Dashboard({ showAlert }) {
                           fontWeight: 700,
                           color: expandedSaldo.valor > 0 ? '#10b981' : '#ef4444'
                         }}>
-                          R$ {Math.abs(expandedSaldo.valor).toFixed(2)}
+                          R$ {Math.abs(expandedSaldo.valor).toFixed(2).replace('.', ',')}
                         </div>
                       </div>
                     )}

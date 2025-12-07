@@ -188,191 +188,206 @@ function Users({ showAlert }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="mx-auto max-w-6xl space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-6">
+      <div className="mx-auto max-w-7xl">
         {/* Header */}
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <Button onClick={() => navigate('/')} variant="outline" size="icon" className="h-12 w-12">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
+        <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-sm hover:shadow-md transition-shadow border border-gray-200"
+            >
+              <ArrowLeft className="h-5 w-5 text-gray-600" />
+            </button>
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900">Usuários</h1>
-              <p className="text-sm text-gray-500">{users.length} usuário{users.length !== 1 ? 's' : ''} cadastrado{users.length !== 1 ? 's' : ''}</p>
+              <h1 className="text-3xl font-bold text-gray-900">Usuários</h1>
+              <p className="text-sm text-gray-500 mt-1">
+                {users.length} usuário{users.length !== 1 ? 's' : ''} cadastrado{users.length !== 1 ? 's' : ''}
+              </p>
             </div>
           </div>
-          <Button onClick={abrirNovo} className="h-12 px-6 text-base">
+          
+          <Button 
+            onClick={abrirNovo} 
+            className="w-full sm:w-auto h-12 px-6 text-base bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-xl transition-all"
+          >
             <Plus className="mr-2 h-5 w-5" />
-            Adicionar Usuário
+            Novo Usuário
           </Button>
         </div>
 
-        {/* Table Card */}
-        <Card>
-          <CardHeader className="space-y-2 p-6">
-            <CardTitle className="text-xl">Lista de Usuários</CardTitle>
-            <CardDescription className="text-base">
-              Gerencie os usuários cadastrados no sistema
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-6">
-            {users.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="mb-4 rounded-full bg-gray-100 p-4">
-                  <Shield className="h-8 w-8 text-gray-400" />
-                </div>
-                <h3 className="mb-2 text-lg font-medium text-gray-900">Nenhum usuário cadastrado</h3>
-                <p className="mb-4 text-sm text-gray-500">
-                  Comece adicionando o primeiro usuário do sistema
-                </p>
-                <Button onClick={abrirNovo} variant="outline">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Adicionar Usuário
-                </Button>
+        {/* Cards Grid */}
+        {users.length === 0 ? (
+          <Card className="border-2 border-dashed border-gray-300 bg-white/50">
+            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="mb-4 rounded-full bg-blue-100 p-6">
+                <Shield className="h-12 w-12 text-blue-600" />
               </div>
-            ) : (
-              <div className="overflow-x-auto -mx-6">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-b">
-                      <TableHead className="px-6">Usuário</TableHead>
-                      <TableHead className="px-4 text-right">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {users.map((user) => (
-                      <TableRow key={user.id} className="h-20 border-b hover:bg-gray-50">
-                        <TableCell className="px-6 py-5">
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-2">
-                              <span className="font-semibold text-base text-gray-900">{user.nome}</span>
-                              {user.is_admin && (
-                                <Badge className="gap-1 text-xs px-2 py-0.5">
-                                  <Shield className="h-3 w-3" />
-                                  Admin
-                                </Badge>
-                              )}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {formatPhone(user.telefone)}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="px-4 py-5 text-right">
-                          <div className="flex justify-end gap-3">
-                            <Button 
-                              onClick={() => abrirEdicao(user)}
-                              variant="ghost"
-                              size="icon"
-                              className="h-11 w-11 rounded-lg border border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                            >
-                              <Pencil className="h-5 w-5 text-gray-600" />
-                            </Button>
-                            <Button 
-                              onClick={() => deletarUsuario(user.id)}
-                              variant="ghost"
-                              size="icon"
-                              className="h-11 w-11 rounded-lg border border-red-200 hover:border-red-300 hover:bg-red-50"
-                            >
-                              <Trash2 className="h-5 w-5 text-red-500" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              <h3 className="mb-2 text-xl font-semibold text-gray-900">Nenhum usuário cadastrado</h3>
+              <p className="mb-6 text-gray-500 max-w-sm">
+                Comece adicionando o primeiro usuário do sistema para gerenciar acessos
+              </p>
+              <Button onClick={abrirNovo} className="h-12 px-6 bg-blue-600 hover:bg-blue-700">
+                <Plus className="mr-2 h-5 w-5" />
+                Adicionar Primeiro Usuário
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {users.map((user) => (
+              <Card 
+                key={user.id}
+                className="group relative overflow-hidden bg-white hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-blue-200"
+              >
+                <CardContent className="p-6">
+                  {/* Header com Avatar */}
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                      {user.nome.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-lg text-gray-900 truncate">
+                        {user.nome}
+                      </h3>
+                      {user.is_admin && (
+                        <Badge className="mt-1 gap-1 text-xs bg-amber-100 text-amber-700 border-amber-200">
+                          <Shield className="h-3 w-3" />
+                          Admin
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Info */}
+                  <div className="space-y-2 mb-4">
+                    <div className="text-sm text-gray-600">
+                      <span className="font-medium">Telefone:</span>
+                      <div className="text-gray-900 mt-0.5">{formatPhone(user.telefone)}</div>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-2 pt-4 border-t border-gray-100">
+                    <Button
+                      onClick={() => abrirEdicao(user)}
+                      variant="outline"
+                      className="flex-1 h-10 border-2 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700"
+                    >
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Editar
+                    </Button>
+                    <Button
+                      onClick={() => deletarUsuario(user.id)}
+                      variant="outline"
+                      className="h-10 px-4 border-2 hover:bg-red-50 hover:border-red-300 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Modal */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent onClose={() => setShowModal(false)}>
-          <DialogHeader>
-            <DialogTitle>
+        <DialogContent className="max-w-md sm:max-w-lg">
+          <DialogHeader className="space-y-3">
+            <DialogTitle className="text-2xl font-bold">
               {editando ? 'Editar Usuário' : 'Novo Usuário'}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-base text-gray-600">
               {editando 
-                ? 'Atualize as informações do usuário abaixo' 
-                : 'Preencha as informações para criar um novo usuário'
+                ? 'Atualize as informações do usuário' 
+                : 'Preencha os dados para criar um novo usuário'
               }
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-3">
-              <Label htmlFor="nome" className="text-base font-medium">Nome</Label>
+          <form onSubmit={handleSubmit} className="space-y-5 mt-4">
+            {/* Nome */}
+            <div className="space-y-2">
+              <Label htmlFor="nome" className="text-sm font-semibold text-gray-700">
+                Nome Completo
+              </Label>
               <Input
                 id="nome"
-                placeholder="Nome completo"
+                placeholder="Ex: João da Silva"
                 value={formData.nome}
                 onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                className="h-12 text-base border-gray-300"
+                className="h-12 text-base"
                 required
               />
             </div>
 
-            <div className="space-y-3">
-              <Label htmlFor="telefone" className="text-base font-medium">Telefone</Label>
+            {/* Telefone */}
+            <div className="space-y-2">
+              <Label htmlFor="telefone" className="text-sm font-semibold text-gray-700">
+                Telefone
+              </Label>
               <Input
                 id="telefone"
                 placeholder="(11) 98765-4321"
                 value={formData.telefone}
                 onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
-                className="h-12 text-base border-gray-300"
+                className="h-12 text-base"
                 required
               />
             </div>
 
+            {/* Senha (apenas criação) */}
             {!editando && (
-              <div className="space-y-3">
-                <Label htmlFor="senha" className="text-base font-medium">Senha</Label>
+              <div className="space-y-2">
+                <Label htmlFor="senha" className="text-sm font-semibold text-gray-700">
+                  Senha
+                </Label>
                 <Input
                   id="senha"
                   type="password"
-                  placeholder="Senha de acesso"
+                  placeholder="Crie uma senha segura"
                   value={formData.senha}
                   onChange={(e) => setFormData({ ...formData, senha: e.target.value })}
-                  className="h-12 text-base border-gray-300"
+                  className="h-12 text-base"
                   required
                 />
               </div>
             )}
 
+            {/* Admin Checkbox */}
             <div className="rounded-lg border-2 border-gray-200 bg-gray-50 p-4">
-              <div className="flex items-center space-x-3">
+              <label className="flex items-start gap-3 cursor-pointer">
                 <input
-                  id="isAdmin"
                   type="checkbox"
                   checked={formData.is_admin}
                   onChange={(e) => setFormData({ ...formData, is_admin: e.target.checked })}
-                  className="h-5 w-5 rounded border-gray-400 cursor-pointer"
+                  className="mt-1 h-5 w-5 rounded border-gray-300 cursor-pointer"
                 />
-                <Label htmlFor="isAdmin" className="cursor-pointer font-normal text-base">
-                  Usuário administrador
-                </Label>
-              </div>
+                <div className="flex-1">
+                  <div className="font-semibold text-sm text-gray-900">Usuário Administrador</div>
+                  <div className="text-xs text-gray-500 mt-0.5">Acesso completo para gerenciar usuários e configurações</div>
+                </div>
+              </label>
             </div>
 
-            <div className="flex gap-4 pt-6 border-t border-gray-200">
+            {/* Botões */}
+            <div className="flex gap-3 pt-4">
               <Button 
                 type="button"
                 variant="outline"
                 onClick={() => setShowModal(false)}
-                className="flex-1 h-12 text-base border-2"
+                className="flex-1 h-12 text-base"
               >
                 Cancelar
               </Button>
               <Button 
                 type="submit"
                 disabled={loading}
-                className="flex-1 h-12 text-base"
+                className="flex-1 h-12 text-base bg-blue-600 hover:bg-blue-700"
               >
-                {loading ? 'Salvando...' : 'Salvar'}
+                {loading ? 'Salvando...' : editando ? 'Atualizar' : 'Criar'}
               </Button>
             </div>
           </form>

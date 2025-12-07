@@ -1,5 +1,39 @@
 
 /* Windows Phone Dashboard Layout - Metro UI + Tailwind Integration */
+
+/* Metro Tile Base Styles */
+.metro-tile {
+  padding: 20px;
+  border-radius: 0;
+  border: none;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.metro-tile-hoverable:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.metro-tile-hoverable:active {
+  transform: scale(0.98);
+}
+
+.metro-tile-medium {
+  min-height: 160px;
+  aspect-ratio: 1 / 1;
+}
+
+.metro-tile-wide {
+  min-height: 160px;
+  aspect-ratio: 2 / 1;
+}
+
 .dashboard-container {
   padding: 16px;
   display: flex;
