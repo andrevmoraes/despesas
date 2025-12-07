@@ -2,8 +2,9 @@
   padding: var(--spacing-md) var(--spacing-lg);
   font-weight: var(--font-weight-semibold);
   border: none;
+  border-radius: 0;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: opacity var(--transition-fast);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-size: 0.875rem;
@@ -13,13 +14,8 @@
   gap: var(--spacing-sm);
 }
 
-.btn:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
 .btn:active {
-  transform: translateY(0);
+  opacity: 0.8;
 }
 
 .btn:disabled {
@@ -33,9 +29,8 @@
 }
 
 .btn--secondary {
-  background-color: transparent;
-  color: var(--text-primary);
-  border: 1px solid #d1d5db;
+  background-color: var(--secondary);
+  color: #ffffff;
 }
 
 .btn--accent {
@@ -49,9 +44,8 @@
 }
 
 .btn--ghost {
-  background-color: transparent;
+  background-color: var(--bg-secondary);
   color: var(--text-primary);
-  border: 1px solid #e6e9ef;
 }
 
 .btn--block {

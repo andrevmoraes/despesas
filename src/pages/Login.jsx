@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext'
 import '../styles/forms.css'
 import '../styles/buttons.css'
 
-export default function Login({ showAlert }) {
+function Login({ showAlert }) {
   const [telefone, setTelefone] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -106,3 +106,5 @@ export default function Login({ showAlert }) {
     </div>
   )
 }
+
+export default Login

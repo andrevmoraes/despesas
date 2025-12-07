@@ -66,11 +66,11 @@ export const verificarCobrancasHoje = async (user, supabase) => {
         const totalReceber = valorPorPessoa * streaming.divisoes.length
         if (totalReceber > 0) {
           notificacoes.push({
-            titulo: '💰 Você vai receber hoje!',
+            titulo: 'Você vai receber hoje!',
             opcoes: {
               body: `${streaming.nome}: R$ ${totalReceber.toFixed(2)} de ${streaming.divisoes.length} ${streaming.divisoes.length === 1 ? 'pessoa' : 'pessoas'}`,
-              icon: '/icon-192.svg',
-              badge: '/icon-192.svg',
+              icon: '/icon-receber.svg',
+              badge: '/icon-receber.svg',
               tag: `receber-${streaming.id}`,
               requireInteraction: true
             }
@@ -82,11 +82,11 @@ export const verificarCobrancasHoje = async (user, supabase) => {
       const estaNaDivisao = streaming.divisoes.some(d => d.user_id === user.id)
       if (estaNaDivisao) {
         notificacoes.push({
-          titulo: '💸 Você tem despesas para acertar hoje!',
+          titulo: 'Você tem despesas para acertar hoje!',
           opcoes: {
             body: `${streaming.nome}: R$ ${valorPorPessoa.toFixed(2)} para ${streaming.pagador.nome}`,
-            icon: '/icon-192.svg',
-            badge: '/icon-192.svg',
+            icon: '/icon-pagar.svg',
+            badge: '/icon-pagar.svg',
             tag: `pagar-${streaming.id}`,
             requireInteraction: true
           }

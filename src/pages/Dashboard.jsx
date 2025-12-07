@@ -1,18 +1,28 @@
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../services/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import * as notificacoes from '../services/notificacoes'
-import '../styles/tiles.css'
+import { MetroTile, MetroButton, MetroStatsCard } from '@andrevmoraes/metro-ui'
+import { MetroColors } from '@andrevmoraes/metro-ui'
+import DashboardSkeleton from '../components/DashboardSkeleton'
+import '../styles/dashboard.css'
 
-export default function Dashboard({ showAlert }) {
+function Dashboard({ showAlert }) {
   const { user, logout } = useAuth()
+  const navigate = useNavigate()
   const [saldos, setSaldos] = useState([])
   const [totalDevendo, setTotalDevendo] = useState(0)
   const [totalRecebendo, setTotalRecebendo] = useState(0)
   const [loading, setLoading] = useState(true)
   const [notificacoesAtivadas, setNotificacoesAtivadas] = useState(false)
   const [expandedId, setExpandedId] = useState(null)
+  const [menuOpen, setMenuOpen] = useState(null) // ID da pessoa com menu aberto
   const intervaloNotificacoesRef = useRef(null)
+  
+  // 🎯 Live Tile Animations (Windows Phone style)
+  const [rotation, setRotation] = useState(0)
+  const [mounted, setMounted] = useState(false)
 
   // Formata número para moeda com vírgula (ex: 16,73)
   const formatMoneyText = (value) => {
@@ -73,18 +83,38 @@ export default function Dashboard({ showAlert }) {
       linhas.push(`- Eu paguei por você: R$ ${formatMoneyText(totalEuPagueiPorVoce)}`)
       linhas.push('--------------------------------')
       if (saldoFinal > 0) {
-        linhas.push(`Você deve me transferir R$ ${formatMoneyText(saldoFinal)}`)
+        linhas.push(`Você deve me transferir: R$ ${formatMoneyText(saldoFinal)}`)
+        // Adiciona chave PIX do usuário atual (quem vai receber)
+        const chavePix = user?.telefone ? String(user.telefone).replace(/\D/g, '').replace(/^55/, '') : ''
+        if (chavePix) {
+          linhas.push(`Minha chave PIX: ${chavePix}`)
+        }
       } else if (saldoFinal < 0) {
-        linhas.push(`Eu devo transferir R$ ${formatMoneyText(Math.abs(saldoFinal))}`)
+        linhas.push(`Eu devo te transferir: R$ ${formatMoneyText(Math.abs(saldoFinal))}`)
+        // Adiciona chave PIX da pessoa (quem vai receber)
+        const chavePix = saldo.pessoa?.telefone ? String(saldo.pessoa.telefone).replace(/\D/g, '').replace(/^55/, '') : ''
+        if (chavePix) {
+          linhas.push(`Sua chave PIX: ${chavePix}`)
+        }
       } else {
         linhas.push(`R$ 0,00`)
       }
     } else {
       // Se só houver uma das categorias, não mostramos Totais — vamos direto ao valor a transferir
       if (saldoFinal > 0) {
-        linhas.push(`Você deve me transferir R$ ${formatMoneyText(saldoFinal)}`)
+        linhas.push(`Você deve me transferir: R$ ${formatMoneyText(saldoFinal)}`)
+        // Adiciona chave PIX do usuário atual (quem vai receber)
+        const chavePix = user?.telefone ? String(user.telefone).replace(/\D/g, '').replace(/^55/, '') : ''
+        if (chavePix) {
+          linhas.push(`Minha chave PIX: ${chavePix}`)
+        }
       } else if (saldoFinal < 0) {
-        linhas.push(`Eu devo transferir R$ ${formatMoneyText(Math.abs(saldoFinal))}`)
+        linhas.push(`Eu devo te transferir: R$ ${formatMoneyText(Math.abs(saldoFinal))}`)
+        // Adiciona chave PIX da pessoa (quem vai receber)
+        const chavePix = saldo.pessoa?.telefone ? String(saldo.pessoa.telefone).replace(/\D/g, '').replace(/^55/, '') : ''
+        if (chavePix) {
+          linhas.push(`Sua chave PIX: ${chavePix}`)
+        }
       } else {
         linhas.push(`R$ 0,00`)
       }
@@ -161,13 +191,150 @@ export default function Dashboard({ showAlert }) {
       }
 
       const texto = `R$${formatMoneyText(amount)} para ${phoneForPix}`
-      await navigator.clipboard.writeText(texto)
-      showAlert('Texto Pix copiado para a área de transferência', 'success')
+      return texto // Retorna para ser usado em outras funções
     } catch (err) {
-      console.error('Erro ao copiar PIX:', err)
-      showAlert('Não foi possível copiar o texto do PIX.', 'error')
+      console.error('Erro ao gerar texto do PIX:', err)
+      showAlert('Não foi possível gerar o texto do PIX.', 'error')
+      return null
     }
   }
+
+  const copiarChavePix = async (saldo) => {
+    try {
+      const amount = Math.abs(Number(saldo.valor) || 0)
+      if (amount <= 0) {
+        showAlert('Valor zero — nada a transferir.', 'warning')
+        return
+      }
+      
+      let telefoneDest = null
+      if (Number(saldo.valor) > 0) {
+        telefoneDest = user?.telefone
+        if (!telefoneDest) {
+          try {
+            const { data, error } = await supabase
+              .from('users')
+              .select('telefone')
+              .eq('id', user?.id)
+              .single()
+            if (!error && data?.telefone) telefoneDest = data.telefone
+          } catch (err) {
+            console.error('Erro ao buscar telefone do usuário atual:', err)
+          }
+        }
+      } else {
+        telefoneDest = saldo.pessoa?.telefone
+        if (!telefoneDest) {
+          try {
+            const { data, error } = await supabase
+              .from('users')
+              .select('telefone')
+              .eq('id', saldo.pessoa?.id)
+              .single()
+            if (!error && data?.telefone) telefoneDest = data.telefone
+          } catch (err) {
+            console.error('Erro ao buscar telefone do destinatário:', err)
+          }
+        }
+      }
+
+      if (!telefoneDest) {
+        showAlert('Telefone do destinatário não disponível.', 'error')
+        return
+      }
+
+      // Remove +55 e formata apenas números
+      const chavePix = String(telefoneDest).replace(/\D/g, '').replace(/^55/, '')
+      await navigator.clipboard.writeText(chavePix)
+      showAlert('Chave PIX copiada para a área de transferência', 'success')
+    } catch (err) {
+      console.error('Erro ao copiar chave PIX:', err)
+      showAlert('Não foi possível copiar a chave PIX.', 'error')
+    }
+  }
+
+  const abrirWhatsAppItau = async (saldo) => {
+    try {
+      const textoPixCompleto = await copiarPix(saldo)
+      if (!textoPixCompleto) return
+
+      const mensagemEncoded = encodeURIComponent(textoPixCompleto)
+      const numeroItau = '5511400415150' // +55 11 4004-1515
+      const linkWhatsApp = `https://wa.me/${numeroItau}?text=${mensagemEncoded}`
+      
+      window.open(linkWhatsApp, '_blank')
+    } catch (err) {
+      console.error('Erro ao abrir WhatsApp:', err)
+      showAlert('Não foi possível abrir o WhatsApp.', 'error')
+    }
+  }
+
+  const marcarComoPago = async (saldo) => {
+    try {
+      const amount = Math.abs(Number(saldo.valor) || 0)
+      if (amount <= 0) {
+        showAlert('Não há valor a pagar neste mês.', 'warning')
+        return
+      }
+
+      const now = new Date()
+      const mes = now.getMonth() + 1 // 1-12
+      const ano = now.getFullYear()
+
+      // Verifica quem é o usuário (quem recebe) e quem é a pessoa (quem paga)
+      const usuario_id = user?.id
+      const pessoa_id = saldo.pessoa?.id
+
+      if (!usuario_id || !pessoa_id) {
+        showAlert('Erro ao identificar usuário ou pessoa.', 'error')
+        return
+      }
+
+      // Insere o pagamento
+      const { error } = await supabase
+        .from('pagamentos_mensais')
+        .insert({
+          usuario_id,
+          pessoa_id,
+          mes,
+          ano,
+          valor_pago: amount
+        })
+
+      if (error) {
+        console.error('Erro ao marcar como pago:', error)
+        showAlert('Erro ao marcar como pago. Tente novamente.', 'error')
+        return
+      }
+
+      showAlert('Pagamento registrado com sucesso!', 'success')
+      
+      // Atualiza apenas o saldo específico no estado local
+      setSaldos(prevSaldos => 
+        prevSaldos.map(s => 
+          s.pessoa.id === pessoa_id 
+            ? { ...s, pagoEsseMes: true }
+            : s
+        )
+      )
+    } catch (err) {
+      console.error('Erro ao marcar como pago:', err)
+      showAlert('Não foi possível marcar como pago.', 'error')
+    }
+  }
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // ⚡ Live Tile Flip Animation (sempre de cima pra baixo)
+  useEffect(() => {
+    const flipInterval = setInterval(() => {
+      setRotation((prev) => prev + 180)
+    }, 8000)
+
+    return () => clearInterval(flipInterval)
+  }, [])
 
   useEffect(() => {
     if (!user?.id) {
@@ -263,8 +430,8 @@ export default function Dashboard({ showAlert }) {
       return
     }
 
-    notificacoes.enviarNotificacao('🔔 Teste de notificação', {
-      body: 'Se você está vendo esta mensagem, as notificações estão funcionando! 🎉',
+    notificacoes.enviarNotificacao('Teste de notificação', {
+      body: 'Se você está vendo esta mensagem, as notificações estão funcionando!',
       icon: '/icon-192.svg',
       badge: '/icon-192.svg',
       tag: 'teste-notificacao',
@@ -286,9 +453,14 @@ export default function Dashboard({ showAlert }) {
     try {
       setLoading(true)
 
+      const now = new Date()
+      const mesAtual = now.getMonth() + 1
+      const anoAtual = now.getFullYear()
+
       const [
         { data: divisoes, error: divisoesError },
-        { data: streamingsPagos, error: streamingsError }
+        { data: streamingsPagos, error: streamingsError },
+        { data: pagamentosMes, error: pagamentosError }
       ] = await Promise.all([
         supabase
           .from('divisoes')
@@ -319,11 +491,24 @@ export default function Dashboard({ showAlert }) {
               )
             )
           `)
-          .eq('pagador_id', usuario.id)
+          .eq('pagador_id', usuario.id),
+        supabase
+          .from('pagamentos_mensais')
+          .select('*')
+          .eq('usuario_id', usuario.id)
+          .eq('mes', mesAtual)
+          .eq('ano', anoAtual)
       ])
 
       if (divisoesError) throw divisoesError
       if (streamingsError) throw streamingsError
+      if (pagamentosError) console.error('Erro ao buscar pagamentos:', pagamentosError)
+
+      // Criar mapa de pagamentos do mês
+      const pagamentosMap = new Map()
+      pagamentosMes?.forEach(p => {
+        pagamentosMap.set(p.pessoa_id, p)
+      })
 
       const saldosMap = new Map()
       let totalDevendoAcumulado = 0
@@ -426,6 +611,14 @@ export default function Dashboard({ showAlert }) {
 
       const saldosOrdenados = Array.from(saldosMap.values())
         .filter((item) => Math.abs(item.valor) > 0.01)
+        .map(item => {
+          // Verifica se há pagamento do mês atual para esta pessoa
+          const pagamento = pagamentosMap.get(item.pessoa.id)
+          return {
+            ...item,
+            pagoEsseMes: !!pagamento
+          }
+        })
         .sort((a, b) => b.valor - a.valor)
 
       setSaldos(saldosOrdenados)
@@ -441,156 +634,650 @@ export default function Dashboard({ showAlert }) {
     }
   }
 
-  if (loading) {
-    return <div className="container" style={{ padding: 'var(--spacing-xl)' }}>
-      Carregando...
-    </div>
+  const showSkeleton = !mounted || !user || loading
+
+  if (showSkeleton) {
+    return <DashboardSkeleton />
   }
 
   return (
-    <div className="container" style={{ padding: 'var(--spacing-xl) var(--spacing-md)' }}>
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        marginBottom: 'var(--spacing-xl)'
-      }}>
-        <div>
-          <h1 style={{ 
-            fontWeight: 'var(--font-weight-bold)', 
-            marginBottom: 'var(--spacing-xs)',
-            fontSize: '2.5rem',
-            letterSpacing: '-1px'
+    <div style={{ backgroundColor: '#ffffff', minHeight: '100vh' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '12px' }}>
+        {/* Grid de Tiles (Windows Phone Layout Responsivo) */}
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(2, 1fr)', 
+          gap: '8px',
+        }}>
+          {/* Live Tile 4x2 com Flip */}
+          <div style={{ 
+            gridColumn: 'span 2', 
+            perspective: '1000px' 
           }}>
-            Olá, {user.nome}
-          </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9375rem' }}>
-            Aqui está um resumo das suas despesas compartilhadas
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
-          {!notificacoesAtivadas && 'Notification' in window && (
-            <button 
-              onClick={ativarNotificacoes} 
-              className="btn btn--accent btn--small"
-              title="Receba lembretes no dia das despesas"
-            >
-              🔔 Ativar Notificações
-            </button>
-          )}
-          {notificacoesAtivadas && (
-            <button
-              onClick={testarNotificacao}
-              className="btn btn--secondary btn--small"
-              title="Dispara uma notificação de teste"
-            >
-              🎯 Testar Notificação
-            </button>
-          )}
-          <button onClick={logout} className="btn btn--ghost btn--small">
-            Sair
-          </button>
-        </div>
-      </div>
-
-      {/* Visão geral removida — exibir somente detalhes por pessoa conforme solicitado */}
-
-      <h2 style={{ 
-        marginTop: 'var(--spacing-xl)', 
-        marginBottom: 'var(--spacing-lg)',
-        fontWeight: 'var(--font-weight-light)'
-      }}>
-        Detalhes por pessoa
-      </h2>
-
-      <div className="tile-grid">
-        {saldos.map((saldo, index) => (
-          <div key={saldo.pessoa.id}>
             <div
-              role="button"
-              tabIndex={0}
-              onClick={() => setExpandedId(expandedId === saldo.pessoa.id ? null : saldo.pessoa.id)}
-              onKeyDown={(e) => { if (e.key === 'Enter') setExpandedId(expandedId === saldo.pessoa.id ? null : saldo.pessoa.id) }}
-              className={`tile ${saldo.valor > 0 ? 'tile--green' : 'tile--pink'}`}
-              style={{ cursor: 'pointer' }}
+              style={{
+                position: 'relative',
+                transformStyle: 'preserve-3d',
+                transform: `rotateX(${rotation}deg)`,
+                transition: 'transform 0.7s ease-in-out',
+              }}
             >
-              <div className="tile__title">{saldo.pessoa.nome}</div>
-              <div className="tile__subtitle">
-                {saldo.valor > 0 ? 'deve para você' : 'você deve'}
+              {/* Frente: "Olá, [Nome]" */}
+              <div style={{ backfaceVisibility: 'hidden' }}>
+                <MetroTile color={MetroColors.blue} size="wide" hoverable={false}>
+                  <div>
+                    <h2 style={{ 
+                      fontFamily: 'Segoe UI, sans-serif',
+                      fontSize: '1.5rem',
+                      fontWeight: 600,
+                      textTransform: 'lowercase',
+                      color: 'white',
+                      margin: 0
+                    }}>
+                      olá, {user.nome.split(' ')[0].toLowerCase()}
+                    </h2>
+                    <p style={{ 
+                      marginTop: '4px',
+                      fontFamily: 'Segoe UI, sans-serif',
+                      fontSize: '0.875rem',
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      margin: 0
+                    }}>
+                      despesas compartilhadas
+                    </p>
+                  </div>
+                </MetroTile>
               </div>
-              <div className="tile__value">
-                R$ {Math.abs(saldo.valor).toFixed(2)}
+
+              {/* Verso: Informações de progresso */}
+              <div style={{
+                position: 'absolute',
+                inset: 0,
+                backfaceVisibility: 'hidden',
+                transform: 'rotateX(180deg)',
+              }}>
+                <MetroTile color={MetroColors.blue} size="wide" hoverable={false}>
+                  <div>
+                    <h2 style={{ 
+                      fontFamily: 'Segoe UI, sans-serif',
+                      fontSize: '1.5rem',
+                      fontWeight: 600,
+                      textTransform: 'lowercase',
+                      color: 'white',
+                      margin: 0,
+                      marginBottom: '16px'
+                    }}>
+                      resumo financeiro
+                    </h2>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ 
+                          fontFamily: 'Segoe UI, sans-serif',
+                          fontSize: '0.875rem',
+                          color: 'rgba(255, 255, 255, 0.9)'
+                        }}>recebendo</span>
+                        <span style={{ 
+                          fontFamily: 'Segoe UI, sans-serif',
+                          fontSize: '1.25rem',
+                          color: 'white',
+                          fontWeight: 300
+                        }}>R$ {totalRecebendo.toFixed(2)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ 
+                          fontFamily: 'Segoe UI, sans-serif',
+                          fontSize: '0.875rem',
+                          color: 'rgba(255, 255, 255, 0.9)'
+                        }}>devendo</span>
+                        <span style={{ 
+                          fontFamily: 'Segoe UI, sans-serif',
+                          fontSize: '1.25rem',
+                          color: 'white',
+                          fontWeight: 300
+                        }}>R$ {totalDevendo.toFixed(2)}</span>
+                      </div>
+                      <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        paddingTop: '8px',
+                        borderTop: '1px solid rgba(255, 255, 255, 0.3)'
+                      }}>
+                        <span style={{ 
+                          fontFamily: 'Segoe UI, sans-serif',
+                          fontSize: '0.875rem',
+                          color: 'rgba(255, 255, 255, 0.9)',
+                          fontWeight: 600
+                        }}>saldo</span>
+                        <span style={{ 
+                          fontFamily: 'Segoe UI, sans-serif',
+                          fontSize: '1.5rem',
+                          color: 'white',
+                          fontWeight: 600
+                        }}>R$ {(totalRecebendo - totalDevendo).toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </MetroTile>
               </div>
             </div>
-
-            {expandedId === saldo.pessoa.id && (
-              <div style={{
-                background: 'var(--bg-secondary)',
-                padding: 'var(--spacing-md)',
-                borderRadius: 'var(--radius-sm)',
-                marginTop: 'var(--spacing-md)'
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <h3 style={{ margin: 0 }}>Detalhes</h3>
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); copiarResumo(saldo) }}
-                      className="btn btn--ghost btn--small"
-                      title="Copiar resumo"
-                      style={{ opacity: 0.9 }}
-                    >
-                      Copiar
-                    </button>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); copiarPix(saldo) }}
-                      className="btn btn--ghost btn--small"
-                      title="Copiar texto PIX"
-                      style={{ opacity: 0.9 }}
-                    >
-                      Copiar PIX
-                    </button>
-                  </div>
-                </div>
-                {saldo.breakdown && saldo.breakdown.length > 0 ? (
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                    {saldo.breakdown.map((d, i) => {
-                      const sign = d.tipo === 'deve_para_voce' ? '+' : '-'
-                      const perPerson = Number(d.valor) || 0
-                      const total = Number(d.valorTotal) || 0
-                      const count = d.participantes || 1
-                      return (
-                        <li key={`${d.streamingId}-${i}`} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #e6e9ef' }}>
-                          <div style={{ color: 'var(--text-secondary)' }}>
-                            <div>{d.nome}</div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                              {total.toFixed(2)} / {count} = {perPerson.toFixed(2)}
-                            </div>
-                          </div>
-                          <div style={{ fontWeight: 600, color: d.tipo === 'deve_para_voce' ? 'var(--accent)' : 'var(--danger)' }}>
-                            {sign} R$ {perPerson.toFixed(2)}
-                          </div>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                ) : (
-                  <div style={{ color: 'var(--text-muted)' }}>Nenhum detalhe disponível</div>
-                )}
-              </div>
-            )}
           </div>
-        ))}
-      </div>
 
-      {saldos.length === 0 && (
-        <div style={{ 
-          textAlign: 'center', 
-          color: 'var(--text-muted)',
-          padding: 'var(--spacing-xl)'
-        }}>
-          Nenhum streaming cadastrado ainda
+          {/* Título: Pessoas */}
+          {saldos.length > 0 && (
+            <div style={{ 
+              gridColumn: 'span 2',
+              marginTop: '16px',
+              marginBottom: '8px'
+            }}>
+              <h3 style={{
+                fontFamily: 'Segoe UI, sans-serif',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+                color: '#6b7280',
+                margin: 0
+              }}>pessoas</h3>
+            </div>
+          )}
+
+          {/* Tiles de Pessoas 2x2 */}
+          {saldos.map((saldo, index) => {
+            const isExpanded = expandedId === saldo.pessoa.id;
+            const isEvenPosition = index % 2 === 1; // posição par (direita) no grid
+            const isLastItem = index === saldos.length - 1;
+            // Verifica se deve mostrar detalhes: quando é posição par E está expandido, 
+            // OU quando é posição ímpar E o card da esquerda está expandido
+            const previousSaldo = index > 0 ? saldos[index - 1] : null;
+            const isPreviousExpanded = previousSaldo && expandedId === previousSaldo.pessoa.id;
+            const shouldShowDetails = (isExpanded && (isEvenPosition || isLastItem)) || (isEvenPosition && isPreviousExpanded);
+            
+            // Encontra o saldo expandido (pode ser o atual ou o anterior)
+            const expandedSaldo = isExpanded ? saldo : (isPreviousExpanded ? previousSaldo : null);
+            
+            return (
+              <React.Fragment key={saldo.pessoa.id}>
+                <div onClick={() => setExpandedId(isExpanded ? null : saldo.pessoa.id)}>
+                  <MetroTile color={MetroColors.blue} size="medium">
+                    <div>
+                      <h2 style={{ 
+                        fontFamily: 'Segoe UI, sans-serif',
+                        fontSize: '1.25rem',
+                        fontWeight: 600,
+                        textTransform: 'lowercase',
+                        color: 'white',
+                        margin: 0
+                      }}>
+                        {saldo.pessoa.nome.toLowerCase()}
+                      </h2>
+                      <p style={{ 
+                        marginTop: '4px',
+                        fontFamily: 'Segoe UI, sans-serif',
+                        fontSize: '0.75rem',
+                        color: 'rgba(255, 255, 255, 0.9)',
+                        margin: 0,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical'
+                      }}>
+                        {saldo.pagoEsseMes ? 'tudo certo esse mês' : (saldo.valor > 0 ? 'deve para você' : 'você deve')}
+                      </p>
+                    </div>
+                    <div style={{ 
+                      textAlign: 'right',
+                      fontFamily: 'Segoe UI, sans-serif',
+                      fontSize: '2rem',
+                      fontWeight: 300,
+                      color: 'rgba(255, 255, 255, 0.2)'
+                    }}>
+                      {saldo.pagoEsseMes ? '' : `R$ ${Math.abs(saldo.valor).toFixed(2)}`}
+                    </div>
+                  </MetroTile>
+                </div>
+
+                {/* Detalhes expandidos após completar a linha */}
+                {shouldShowDetails && expandedSaldo && (
+                  <React.Fragment>
+                <div style={{ 
+                  gridColumn: 'span 2',
+                  background: '#f5f5f5', 
+                  padding: '24px',
+                  borderRadius: '4px',
+                  overflow: 'visible',
+                  animation: 'slideDown 0.3s ease-out'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', position: 'relative' }}>
+                    <h3 style={{ 
+                      margin: 0,
+                      fontSize: '0.875rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      fontWeight: 600,
+                      color: '#1f2937'
+                    }}>detalhes de {expandedSaldo.pessoa.nome.toLowerCase()}</h3>
+                    
+                    {/* Botão de três pontos */}
+                    <button
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        setMenuOpen(menuOpen === expandedSaldo.pessoa.id ? null : expandedSaldo.pessoa.id);
+                      }}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '1.5rem',
+                        color: '#6b7280',
+                        padding: '4px 8px',
+                        lineHeight: 1
+                      }}
+                    >
+                      ⋯
+                    </button>
+
+                    {/* Menu popup estilo Windows Phone */}
+                    {menuOpen === expandedSaldo.pessoa.id && (
+                      <div 
+                        style={{
+                          position: 'absolute',
+                          right: 0,
+                          bottom: '100%',
+                          marginBottom: '8px',
+                          background: 'white',
+                          border: '2px solid ' + MetroColors.blue,
+                          zIndex: 9999,
+                          animation: 'scaleFromOrigin 0.15s ease-out',
+                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            copiarResumo(expandedSaldo);
+                            setMenuOpen(null);
+                          }}
+                          style={{
+                            display: 'block',
+                            width: '100%',
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#1f2937',
+                            padding: '10px 16px',
+                            textAlign: 'left',
+                            cursor: 'pointer',
+                            fontSize: '0.75rem',
+                            fontFamily: 'Segoe UI, sans-serif',
+                            textTransform: 'lowercase',
+                            transition: 'background 0.15s',
+                            borderBottom: '1px solid #e5e7eb',
+                            whiteSpace: 'nowrap'
+                          }}
+                          onMouseEnter={(e) => { 
+                            e.target.style.background = MetroColors.blue;
+                            e.target.style.color = 'white';
+                          }}
+                          onMouseLeave={(e) => { 
+                            e.target.style.background = 'transparent';
+                            e.target.style.color = '#1f2937';
+                          }}
+                        >
+                          copiar resumo
+                        </button>
+                        <button
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            copiarChavePix(expandedSaldo);
+                            setMenuOpen(null);
+                          }}
+                          style={{
+                            display: 'block',
+                            width: '100%',
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#1f2937',
+                            padding: '10px 16px',
+                            textAlign: 'left',
+                            cursor: 'pointer',
+                            fontSize: '0.75rem',
+                            fontFamily: 'Segoe UI, sans-serif',
+                            textTransform: 'lowercase',
+                            transition: 'background 0.15s',
+                            borderBottom: '1px solid #e5e7eb',
+                            whiteSpace: 'nowrap'
+                          }}
+                          onMouseEnter={(e) => { 
+                            e.target.style.background = MetroColors.blue;
+                            e.target.style.color = 'white';
+                          }}
+                          onMouseLeave={(e) => { 
+                            e.target.style.background = 'transparent';
+                            e.target.style.color = '#1f2937';
+                          }}
+                        >
+                          copiar chave pix
+                        </button>
+                        <button
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            abrirWhatsAppItau(expandedSaldo);
+                            setMenuOpen(null);
+                          }}
+                          style={{
+                            display: 'block',
+                            width: '100%',
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#1f2937',
+                            padding: '10px 16px',
+                            textAlign: 'left',
+                            cursor: 'pointer',
+                            fontSize: '0.75rem',
+                            fontFamily: 'Segoe UI, sans-serif',
+                            textTransform: 'lowercase',
+                            transition: 'background 0.15s',
+                            borderBottom: '1px solid #e5e7eb',
+                            whiteSpace: 'nowrap'
+                          }}
+                          onMouseEnter={(e) => { 
+                            e.target.style.background = MetroColors.blue;
+                            e.target.style.color = 'white';
+                          }}
+                          onMouseLeave={(e) => { 
+                            e.target.style.background = 'transparent';
+                            e.target.style.color = '#1f2937';
+                          }}
+                        >
+                          pix no whatsapp do itaú
+                        </button>
+                        <button
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            marcarComoPago(expandedSaldo);
+                            setMenuOpen(null);
+                          }}
+                          style={{
+                            display: 'block',
+                            width: '100%',
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#1f2937',
+                            padding: '10px 16px',
+                            textAlign: 'left',
+                            cursor: 'pointer',
+                            fontSize: '0.75rem',
+                            fontFamily: 'Segoe UI, sans-serif',
+                            textTransform: 'lowercase',
+                            transition: 'background 0.15s',
+                            borderBottom: '1px solid #e5e7eb',
+                            whiteSpace: 'nowrap'
+                          }}
+                          onMouseEnter={(e) => { 
+                            e.target.style.background = MetroColors.blue;
+                            e.target.style.color = 'white';
+                          }}
+                          onMouseLeave={(e) => { 
+                            e.target.style.background = 'transparent';
+                            e.target.style.color = '#1f2937';
+                          }}
+                        >
+                          marcar {new Date().toLocaleDateString('pt-BR', { month: 'long' })} como pago
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                    {expandedSaldo.breakdown && expandedSaldo.breakdown.length > 0 ? (
+                      <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                        {expandedSaldo.breakdown.map((d, i) => {
+                          const sign = d.tipo === 'deve_para_voce' ? '+' : '-'
+                          const perPerson = Number(d.valor) || 0
+                          const total = Number(d.valorTotal) || 0
+                          const count = d.participantes || 1
+                          return (
+                            <li key={`${d.streamingId}-${i}`} style={{ 
+                              display: 'flex', 
+                              justifyContent: 'space-between', 
+                              padding: '12px 0', 
+                              borderBottom: i < expandedSaldo.breakdown.length - 1 ? '1px solid #e5e7eb' : 'none'
+                            }}>
+                              <div>
+                                <div style={{ 
+                                  fontWeight: 600, 
+                                  color: '#1f2937',
+                                  marginBottom: '4px'
+                                }}>{d.nome}</div>
+                                <div style={{ 
+                                  fontSize: '0.8rem', 
+                                  color: '#6b7280'
+                                }}>
+                                  Total: R$ {total.toFixed(2)} ÷ {count} perfis = R$ {perPerson.toFixed(2)}
+                                </div>
+                              </div>
+                              <div style={{ 
+                                fontWeight: 700, 
+                                fontSize: '1.1rem',
+                                color: d.tipo === 'deve_para_voce' ? '#10b981' : '#ef4444' 
+                              }}>
+                                {sign} R$ {perPerson.toFixed(2)}
+                              </div>
+                            </li>
+                          )
+                        })}
+                      </ul>
+                    ) : (
+                      <div style={{ 
+                        color: '#9ca3af',
+                        textAlign: 'center',
+                        padding: '24px',
+                        fontFamily: 'Segoe UI, sans-serif'
+                      }}>Nenhum detalhe disponível</div>
+                    )}
+                    
+                    {/* Total do saldo */}
+                    {expandedSaldo.breakdown && expandedSaldo.breakdown.length > 0 && (
+                      <div style={{
+                        marginTop: '16px',
+                        paddingTop: '16px',
+                        borderTop: '2px solid #e5e7eb',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                      }}>
+                        <div style={{
+                          fontFamily: 'Segoe UI, sans-serif',
+                          fontSize: '0.875rem',
+                          fontWeight: 600,
+                          color: '#1f2937',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px'
+                        }}>
+                          {expandedSaldo.valor > 0 ? 'Total a receber' : 'Total a pagar'}
+                        </div>
+                        <div style={{
+                          fontFamily: 'Segoe UI, sans-serif',
+                          fontSize: '1.5rem',
+                          fontWeight: 700,
+                          color: expandedSaldo.valor > 0 ? '#10b981' : '#ef4444'
+                        }}>
+                          R$ {Math.abs(expandedSaldo.valor).toFixed(2)}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </React.Fragment>
+                )}
+              </React.Fragment>
+            );
+          })}
+
+          {/* Título: Configurações */}
+          <div style={{ 
+            gridColumn: 'span 2',
+            marginTop: '16px',
+            marginBottom: '8px'
+          }}>
+            <h3 style={{
+              fontFamily: 'Segoe UI, sans-serif',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '1px',
+              color: '#6b7280',
+              margin: 0
+            }}>configurações</h3>
+          </div>
+
+          {/* Tile de Notificações/Configurações */}
+          <MetroTile 
+            color={MetroColors.blue} 
+            size="medium"
+            onClick={notificacoesAtivadas ? testarNotificacao : ativarNotificacoes}
+          >
+            <div>
+              <h2 style={{ 
+                fontFamily: 'Segoe UI, sans-serif',
+                fontSize: '1.25rem',
+                fontWeight: 600,
+                textTransform: 'lowercase',
+                color: 'white',
+                margin: 0
+              }}>
+                {notificacoesAtivadas ? 'testar' : 'ativar'}
+              </h2>
+              <p style={{ 
+                marginTop: '4px',
+                fontFamily: 'Segoe UI, sans-serif',
+                fontSize: '0.75rem',
+                color: 'rgba(255, 255, 255, 0.9)',
+                margin: 0
+              }}>
+                notificações
+              </p>
+            </div>
+          </MetroTile>
+
+          {/* Tile de Streamings */}
+          <MetroTile 
+            color={MetroColors.blue} 
+            size="medium"
+            onClick={() => navigate('/streamings')}
+          >
+            <div>
+              <h2 style={{ 
+                fontFamily: 'Segoe UI, sans-serif',
+                fontSize: '1.25rem',
+                fontWeight: 600,
+                textTransform: 'lowercase',
+                color: 'white',
+                margin: 0
+              }}>
+                streamings
+              </h2>
+              <p style={{ 
+                marginTop: '4px',
+                fontFamily: 'Segoe UI, sans-serif',
+                fontSize: '0.75rem',
+                color: 'rgba(255, 255, 255, 0.9)',
+                margin: 0
+              }}>
+                gerenciar assinaturas
+              </p>
+            </div>
+          </MetroTile>
+
+          {/* Tile de Usuários */}
+          <MetroTile 
+            color={MetroColors.blue} 
+            size="medium"
+            onClick={() => navigate('/usuarios')}
+          >
+            <div>
+              <h2 style={{ 
+                fontFamily: 'Segoe UI, sans-serif',
+                fontSize: '1.25rem',
+                fontWeight: 600,
+                textTransform: 'lowercase',
+                color: 'white',
+                margin: 0
+              }}>
+                usuários
+              </h2>
+              <p style={{ 
+                marginTop: '4px',
+                fontFamily: 'Segoe UI, sans-serif',
+                fontSize: '0.75rem',
+                color: 'rgba(255, 255, 255, 0.9)',
+                margin: 0
+              }}>
+                gerenciar pessoas
+              </p>
+            </div>
+          </MetroTile>
+
+          {/* Tile de Sair */}
+          <MetroTile 
+            color={MetroColors.blue} 
+            size="medium"
+            onClick={logout}
+          >
+            <div>
+              <h2 style={{ 
+                fontFamily: 'Segoe UI, sans-serif',
+                fontSize: '1.25rem',
+                fontWeight: 600,
+                textTransform: 'lowercase',
+                color: 'white',
+                margin: 0
+              }}>
+                sair
+              </h2>
+              <p style={{ 
+                marginTop: '4px',
+                fontFamily: 'Segoe UI, sans-serif',
+                fontSize: '0.75rem',
+                color: 'rgba(255, 255, 255, 0.9)',
+                margin: 0
+              }}>
+                encerrar sessão
+              </p>
+            </div>
+          </MetroTile>
         </div>
-      )}
+
+        {/* Empty State */}
+        {saldos.length === 0 && (
+          <div style={{ 
+            gridColumn: 'span 2',
+            marginTop: '64px',
+            border: '2px dashed #e5e7eb',
+            padding: '48px',
+            textAlign: 'center'
+          }}>
+            <h3 style={{ 
+              marginBottom: '8px',
+              fontFamily: 'Segoe UI, sans-serif',
+              fontSize: '1.25rem',
+              fontWeight: 300,
+              textTransform: 'lowercase',
+              color: '#1f2937'
+            }}>
+              nenhuma despesa
+            </h3>
+            <p style={{ 
+              fontFamily: 'Segoe UI, sans-serif',
+              fontSize: '0.875rem',
+              color: '#6b7280'
+            }}>
+              cadastre streamings para começar
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
+
+export default Dashboard

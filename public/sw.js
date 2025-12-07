@@ -1,9 +1,11 @@
 // Atualize a versão ao alterar a estratégia de cache
-const CACHE_NAME = 'cobranca-v2'
+const CACHE_NAME = 'cobranca-v3'
 const urlsToCache = [
   '/',
   '/index.html',
-  '/manifest.json'
+  '/manifest.json',
+  '/icon-192.svg',
+  '/icon-512.svg'
 ]
 
 // Instalação do service worker
@@ -67,7 +69,25 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Para outros recursos, priorizamos cache-first para performance
+  // Para arquivos de script e CSS (assets versionados do Vite), usar network-first
+  // para garantir que mudanças de UI sejam imediatamente refletidas
+  if (requestUrl.pathname.match(/\.(js|css)$/)) {
+    event.respondWith(
+      fetch(request.clone())
+        .then((networkResponse) => {
+          if (!networkResponse || networkResponse.status !== 200) {
+            return caches.match(request) || networkResponse
+          }
+          const responseToCache = networkResponse.clone()
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseToCache))
+          return networkResponse
+        })
+        .catch(() => caches.match(request))
+    )
+    return
+  }
+
+  // Para outros recursos (imagens, fontes, etc), cache-first para performance
   event.respondWith(
     caches.match(request).then((response) => {
       if (response) return response

@@ -19,7 +19,7 @@
   
   /* Backgrounds (simplified light theme) */
   --bg-primary: #ffffff;
-  --bg-secondary: #f6f7f9;
+  --bg-secondary: #f0f0f0;
   --bg-card: #ffffff;
   
   /* Text */
@@ -43,13 +43,8 @@
   
   /* Border radius */
   --radius-none: 0;
-  --radius-sm: 6px;
-  --radius-xl: 10px;
-
-  /* Blur / shadows */
-  --blur-md: 0px;
-  --shadow-md: 0 4px 10px rgba(16, 24, 40, 0.06);
-  --shadow-lg: 0 8px 20px rgba(16, 24, 40, 0.08);
+  --radius-sm: 0;
+  --radius-xl: 0;
   
   /* Transitions */
   --transition-fast: 150ms ease;
@@ -130,3 +125,13 @@ a {
 .mb-sm { margin-bottom: var(--spacing-sm); }
 .mb-md { margin-bottom: var(--spacing-md); }
 .mb-lg { margin-bottom: var(--spacing-lg); }
+
+/* Loading Spinner Animation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

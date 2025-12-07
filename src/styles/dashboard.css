@@ -1,0 +1,213 @@
+
+/* Windows Phone Dashboard Layout - Metro UI + Tailwind Integration */
+.dashboard-container {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background-color: #ffffff;
+  min-height: 100vh;
+}
+
+/* Header Tile 4x2 - Override Metro UI defaults */
+.dashboard-header {
+  display: flex !important;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 160px;
+}
+
+.dashboard-header__content {
+  flex: 1;
+}
+
+.dashboard-header__greeting {
+  font-size: 3rem;
+  font-weight: 300;
+  line-height: 1;
+  margin: 0 0 8px 0;
+  color: #ffffff;
+  letter-spacing: -2px;
+  text-transform: lowercase;
+}
+
+.dashboard-header__subtitle {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  text-transform: lowercase;
+  font-weight: 400;
+}
+
+.dashboard-header__actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+/* Info Tiles Grid 2x2 - Metro UI Stats Cards */
+.dashboard-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin: 0;
+}
+
+.dashboard-info-tile {
+  min-height: 160px;
+}
+
+/* Person Tiles Grid 4x2 - Metro UI Tiles */
+.dashboard-person-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dashboard-person-tile-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.dashboard-person-tile {
+  min-height: 160px;
+  display: flex !important;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.dashboard-person-tile__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.dashboard-person-tile .tile__title {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+  text-transform: lowercase;
+  letter-spacing: -0.5px;
+  color: #ffffff;
+  font-weight: 300;
+}
+
+.dashboard-person-tile .tile__subtitle {
+  font-size: 0.875rem;
+  text-transform: lowercase;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.dashboard-person-tile .tile__value {
+  color: #ffffff;
+  font-weight: 300;
+  letter-spacing: -1px;
+}
+
+/* Expanded Details */
+.dashboard-person-details {
+  background: #f5f5f5;
+  padding: 24px;
+  margin-top: -16px;
+  margin-bottom: 0;
+}
+
+.dashboard-person-details h3 {
+  margin: 0;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.dashboard-person-details ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dashboard-person-details li {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #e6e9ef;
+}
+
+.dashboard-person-details li:last-child {
+  border-bottom: none;
+}
+
+/* Empty State - Metro UI Tile */
+.dashboard-empty {
+  min-height: 160px;
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.dashboard-empty .tile__title {
+  font-size: 1.25rem;
+  margin-bottom: 8px;
+  text-transform: lowercase;
+  color: #ffffff;
+}
+
+.dashboard-empty .tile__subtitle {
+  font-size: 0.875rem;
+  text-transform: lowercase;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Responsive - Desktop */
+@media (min-width: 768px) {
+  .dashboard-container {
+    padding: 24px;
+    gap: 24px;
+  }
+
+  .dashboard-header {
+    min-height: 180px !important;
+  }
+
+  .dashboard-info-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .dashboard-info-tile {
+    min-height: 180px;
+  }
+
+  .dashboard-person-grid {
+    gap: 24px;
+  }
+
+  .dashboard-person-tile {
+    min-height: 180px !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .dashboard-header {
+    min-height: 200px !important;
+  }
+
+  .dashboard-info-tile {
+    min-height: 200px;
+  }
+
+  .dashboard-person-tile {
+    min-height: 200px !important;
+  }
+
+  .dashboard-person-tile .tile__title {
+    font-size: 1.75rem;
+  }
+}

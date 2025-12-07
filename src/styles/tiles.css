@@ -1,80 +1,84 @@
 .tile {
   background: var(--bg-card);
-  border: 1px solid #e6e9ef;
-  border-radius: var(--radius-xl);
+  border: none;
+  border-radius: 0;
   padding: var(--spacing-lg);
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  transition: opacity var(--transition-fast);
   cursor: default;
   position: relative;
   overflow: hidden;
-  box-shadow: var(--shadow-md);
-}
-
-.tile:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  margin: 0;
 }
 
 .tile:active {
-  transform: translateY(0);
+  opacity: 0.8;
 }
 
-/* Glass tiles com cores vibrantes */
 .tile--primary {
-  border-left: 4px solid var(--primary);
+  background: var(--primary);
+  color: #ffffff;
 }
 
 .tile--secondary {
-  border-left: 4px solid var(--secondary);
+  background: var(--secondary);
+  color: #ffffff;
 }
 
 .tile--accent {
-  border-left: 4px solid var(--accent);
+  background: var(--accent);
+  color: #ffffff;
 }
 
 .tile--success {
-  border-left: 4px solid var(--success);
+  background: var(--success);
+  color: #ffffff;
 }
 
 .tile--danger {
-  border-left: 4px solid var(--danger);
+  background: var(--danger);
+  color: #ffffff;
 }
 
 .tile--green {
-  border-left: 4px solid var(--success);
+  background: var(--success);
+  color: #ffffff;
 }
 
 .tile--purple {
-  border-left: 4px solid var(--wp-purple);
+  background: var(--wp-purple);
+  color: #ffffff;
 }
 
 .tile--pink {
-  border-left: 4px solid var(--wp-pink);
+  background: var(--wp-pink);
+  color: #ffffff;
 }
 
 .tile--lime {
-  border-left: 4px solid var(--wp-lime);
+  background: var(--wp-lime);
+  color: #ffffff;
 }
 
 .tile__title {
   font-size: 1.125rem;
   font-weight: var(--font-weight-semibold);
   margin-bottom: var(--spacing-sm);
-  color: var(--text-primary);
+  color: #ffffff;
   letter-spacing: -0.3px;
 }
 
 .tile__subtitle {
   font-size: 0.875rem;
-  color: var(--text-secondary);
-  font-weight: var(--font-weight-medium);
+  color: #ffffff;
+  font-weight: var(--font-weight-regular);
+  opacity: 0.95;
 }
 
 .tile__value {
   font-size: 2.5rem;
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-light);
   margin-top: var(--spacing-md);
-  color: var(--text-primary);
+  color: #ffffff;
   letter-spacing: -1px;
   line-height: 1;
 }

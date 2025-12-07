@@ -1,0 +1,55 @@
+/* Skeleton Loading Styles - Windows Phone Metro UI */
+
+/* Progress Bar Animation */
+.skeleton-progress-bar {
+  animation: progress-slide 1.5s ease-in-out infinite;
+}
+
+@keyframes progress-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+/* Skeleton Tile - Gray Version (Tailwind style) */
+.skeleton-tile-gray {
+  background: #e5e7eb; /* gray-200 */
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+  animation: skeleton-pulse 2s ease-in-out infinite;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .skeleton-tile-gray {
+    background: #1f2937; /* gray-800 */
+  }
+}
+
+/* Animação sutil de pulse */
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Skeleton Text Elements - Gray Version */
+.skeleton-text-gray {
+  background: #d1d5db; /* gray-300 */
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (prefers-color-scheme: dark) {
+  .skeleton-text-gray {
+    background: #374151; /* gray-700 */
+  }
+}
