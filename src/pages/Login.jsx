@@ -49,28 +49,9 @@ function Login({ showAlert }) {
   }
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center',
-      padding: 'var(--spacing-md)'
-    }}>
-      <div style={{ 
-        width: '100%', 
-        maxWidth: '400px',
-        backgroundColor: 'var(--bg-secondary)',
-        padding: 'var(--spacing-xl)',
-        borderLeft: '4px solid var(--primary)'
-      }}>
-        <h1 style={{ 
-          fontSize: '2.5rem', 
-          fontWeight: 'var(--font-weight-light)',
-          marginBottom: 'var(--spacing-lg)',
-          color: 'var(--primary)'
-        }}>
-          despesas
-        </h1>
+    <div className="metro-page metro-page--centered">
+      <div className="metro-panel">
+        <h1 className="metro-panel__title">despesas</h1>
         
         <form onSubmit={handleSubmit}>
           <div className="form-group">

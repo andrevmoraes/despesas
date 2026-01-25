@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   background-color: var(--bg-primary);
-  border-top: 1px solid #e6e9ef;
+  border-top: 2px solid var(--border-subtle);
   display: flex;
   justify-content: space-around;
   padding: var(--spacing-sm) 0;
@@ -18,7 +18,7 @@
   gap: var(--spacing-xs);
   padding: var(--spacing-sm) var(--spacing-md);
   color: var(--text-secondary);
-  transition: color var(--transition-fast);
+  transition: color var(--transition-fast), opacity var(--transition-fast);
   cursor: pointer;
   border: none;
   background: none;
@@ -27,11 +27,17 @@
 
 .bottom-nav__item:hover {
   color: var(--text-primary);
+  opacity: var(--state-hover-opacity);
 }
 
 .bottom-nav__item--active {
   color: var(--primary);
   font-weight: var(--font-weight-semibold);
+}
+
+.bottom-nav__item:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: 2px;
 }
 
 .bottom-nav__icon {

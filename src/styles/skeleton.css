@@ -16,8 +16,8 @@
 
 /* Skeleton Tile - Gray Version (Tailwind style) */
 .skeleton-tile-gray {
-  background: #e5e7eb; /* gray-200 */
-  border-radius: 2px;
+  background: var(--border-subtle);
+  border-radius: 0;
   position: relative;
   overflow: hidden;
   animation: skeleton-pulse 2s ease-in-out infinite;
@@ -26,7 +26,7 @@
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .skeleton-tile-gray {
-    background: #1f2937; /* gray-800 */
+    background: #1f2937;
   }
 }
 
@@ -42,8 +42,8 @@
 
 /* Skeleton Text Elements - Gray Version */
 .skeleton-text-gray {
-  background: #d1d5db; /* gray-300 */
-  border-radius: 2px;
+  background: var(--border-strong);
+  border-radius: 0;
   position: relative;
   overflow: hidden;
 }
