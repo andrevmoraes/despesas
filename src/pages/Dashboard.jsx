@@ -8,10 +8,10 @@ import '../styles/dashboard.css'
 
 // Metro UI Colors
 const MetroColors = {
-  blue: '#0078D7',
-  darkBlue: '#005A9E',
-  green: '#10b981',
-  red: '#ef4444'
+  blue: 'var(--primary)',
+  darkBlue: 'var(--secondary)',
+  green: 'var(--success)',
+  red: 'var(--danger)'
 }
 
 // Metro Tile Component
@@ -665,7 +665,7 @@ function Dashboard({ showAlert }) {
   }
 
   return (
-    <div style={{ backgroundColor: '#ffffff', minHeight: '100vh' }}>
+    <div style={{ backgroundColor: 'var(--bg-primary)', minHeight: '100vh' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '12px' }}>
         {/* Grid de Tiles (Windows Phone Layout Responsivo) */}
         <div style={{ 
@@ -800,7 +800,7 @@ function Dashboard({ showAlert }) {
                 fontWeight: 600,
                 textTransform: 'uppercase',
                 letterSpacing: '1px',
-                color: '#6b7280',
+                color: 'var(--text-muted)',
                 margin: 0
               }}>pessoas</h3>
             </div>
@@ -873,21 +873,14 @@ function Dashboard({ showAlert }) {
                   <React.Fragment>
                 <div style={{ 
                   gridColumn: 'span 2',
-                  background: '#f5f5f5', 
+                  background: 'var(--bg-secondary)', 
                   padding: '24px',
                   borderRadius: '4px',
                   overflow: 'visible',
                   animation: 'slideDown 0.3s ease-out'
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', position: 'relative' }}>
-                    <h3 style={{ 
-                      margin: 0,
-                      fontSize: '0.875rem',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.5px',
-                      fontWeight: 600,
-                      color: '#1f2937'
-                    }}>detalhes de {expandedSaldo.pessoa.nome.toLowerCase()}</h3>
+                    <h3 className="metro-details-title">detalhes de {expandedSaldo.pessoa.nome.toLowerCase()}</h3>
                     
                     {/* Botão de três pontos */}
                     <button
@@ -895,15 +888,7 @@ function Dashboard({ showAlert }) {
                         e.stopPropagation(); 
                         setMenuOpen(menuOpen === expandedSaldo.pessoa.id ? null : expandedSaldo.pessoa.id);
                       }}
-                      style={{
-                        background: 'transparent',
-                        border: 'none',
-                        cursor: 'pointer',
-                        fontSize: '1.5rem',
-                        color: '#6b7280',
-                        padding: '4px 8px',
-                        lineHeight: 1
-                      }}
+                      className="metro-ellipsis-button"
                     >
                       ⋯
                     </button>
@@ -911,18 +896,7 @@ function Dashboard({ showAlert }) {
                     {/* Menu popup estilo Windows Phone */}
                     {menuOpen === expandedSaldo.pessoa.id && (
                       <div 
-                        style={{
-                          position: 'absolute',
-                          right: 0,
-                          bottom: '100%',
-                          marginBottom: '8px',
-                          background: 'white',
-                          border: '2px solid ' + MetroColors.blue,
-                          zIndex: 9999,
-                          animation: 'scaleFromOrigin 0.15s ease-out',
-                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                          minWidth: '200px'
-                        }}
+                        className="metro-menu"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <button
@@ -931,30 +905,7 @@ function Dashboard({ showAlert }) {
                             copiarResumo(expandedSaldo);
                             setMenuOpen(null);
                           }}
-                          style={{
-                            display: 'block',
-                            width: '100%',
-                            background: 'transparent',
-                            border: 'none',
-                            color: '#1f2937',
-                            padding: '16px 20px',
-                            textAlign: 'left',
-                            cursor: 'pointer',
-                            fontSize: '1rem',
-                            fontFamily: 'Segoe UI, sans-serif',
-                            textTransform: 'lowercase',
-                            transition: 'background 0.15s',
-                            borderBottom: '1px solid #e5e7eb',
-                            whiteSpace: 'nowrap'
-                          }}
-                          onMouseEnter={(e) => { 
-                            e.target.style.background = MetroColors.blue;
-                            e.target.style.color = 'white';
-                          }}
-                          onMouseLeave={(e) => { 
-                            e.target.style.background = 'transparent';
-                            e.target.style.color = '#1f2937';
-                          }}
+                          className="metro-menu__item"
                         >
                           copiar resumo
                         </button>
@@ -964,30 +915,7 @@ function Dashboard({ showAlert }) {
                             copiarChavePix(expandedSaldo);
                             setMenuOpen(null);
                           }}
-                          style={{
-                            display: 'block',
-                            width: '100%',
-                            background: 'transparent',
-                            border: 'none',
-                            color: '#1f2937',
-                            padding: '16px 20px',
-                            textAlign: 'left',
-                            cursor: 'pointer',
-                            fontSize: '1rem',
-                            fontFamily: 'Segoe UI, sans-serif',
-                            textTransform: 'lowercase',
-                            transition: 'background 0.15s',
-                            borderBottom: '1px solid #e5e7eb',
-                            whiteSpace: 'nowrap'
-                          }}
-                          onMouseEnter={(e) => { 
-                            e.target.style.background = MetroColors.blue;
-                            e.target.style.color = 'white';
-                          }}
-                          onMouseLeave={(e) => { 
-                            e.target.style.background = 'transparent';
-                            e.target.style.color = '#1f2937';
-                          }}
+                          className="metro-menu__item"
                         >
                           copiar chave pix
                         </button>
@@ -997,30 +925,7 @@ function Dashboard({ showAlert }) {
                             abrirWhatsAppItau(expandedSaldo);
                             setMenuOpen(null);
                           }}
-                          style={{
-                            display: 'block',
-                            width: '100%',
-                            background: 'transparent',
-                            border: 'none',
-                            color: '#1f2937',
-                            padding: '16px 20px',
-                            textAlign: 'left',
-                            cursor: 'pointer',
-                            fontSize: '1rem',
-                            fontFamily: 'Segoe UI, sans-serif',
-                            textTransform: 'lowercase',
-                            transition: 'background 0.15s',
-                            borderBottom: '1px solid #e5e7eb',
-                            whiteSpace: 'nowrap'
-                          }}
-                          onMouseEnter={(e) => { 
-                            e.target.style.background = MetroColors.blue;
-                            e.target.style.color = 'white';
-                          }}
-                          onMouseLeave={(e) => { 
-                            e.target.style.background = 'transparent';
-                            e.target.style.color = '#1f2937';
-                          }}
+                          className="metro-menu__item"
                         >
                           pix no whatsapp do itaú
                         </button>
@@ -1030,29 +935,7 @@ function Dashboard({ showAlert }) {
                             marcarComoPago(expandedSaldo);
                             setMenuOpen(null);
                           }}
-                          style={{
-                            display: 'block',
-                            width: '100%',
-                            background: 'transparent',
-                            border: 'none',
-                            color: '#1f2937',
-                            padding: '16px 20px',
-                            textAlign: 'left',
-                            cursor: 'pointer',
-                            fontSize: '1rem',
-                            fontFamily: 'Segoe UI, sans-serif',
-                            textTransform: 'lowercase',
-                            transition: 'background 0.15s',
-                            whiteSpace: 'nowrap'
-                          }}
-                          onMouseEnter={(e) => { 
-                            e.target.style.background = MetroColors.blue;
-                            e.target.style.color = 'white';
-                          }}
-                          onMouseLeave={(e) => { 
-                            e.target.style.background = 'transparent';
-                            e.target.style.color = '#1f2937';
-                          }}
+                          className="metro-menu__item"
                         >
                           marcar {new Date().toLocaleDateString('pt-BR', { month: 'long' })} como pago
                         </button>
@@ -1071,17 +954,17 @@ function Dashboard({ showAlert }) {
                               display: 'flex', 
                               justifyContent: 'space-between', 
                               padding: '12px 0', 
-                              borderBottom: i < expandedSaldo.breakdown.length - 1 ? '1px solid #e5e7eb' : 'none'
+                              borderBottom: i < expandedSaldo.breakdown.length - 1 ? '1px solid var(--border-subtle)' : 'none'
                             }}>
                               <div>
                                 <div style={{ 
                                   fontWeight: 600, 
-                                  color: '#1f2937',
+                                  color: 'var(--text-primary)',
                                   marginBottom: '4px'
                                 }}>{d.nome}</div>
                                 <div style={{ 
                                   fontSize: '0.8rem', 
-                                  color: '#6b7280'
+                                  color: 'var(--text-muted)'
                                 }}>
                                   Total: R$ {total.toFixed(2).replace('.', ',')} ÷ {count} perfis = R$ {perPerson.toFixed(2).replace('.', ',')}
                                 </div>
@@ -1089,7 +972,7 @@ function Dashboard({ showAlert }) {
                               <div style={{ 
                                 fontWeight: 700, 
                                 fontSize: '1.1rem',
-                                color: d.tipo === 'deve_para_voce' ? '#10b981' : '#ef4444' 
+                                color: d.tipo === 'deve_para_voce' ? 'var(--success)' : 'var(--danger)' 
                               }}>
                                 {sign} R$ {perPerson.toFixed(2).replace('.', ',')}
                               </div>
@@ -1099,7 +982,7 @@ function Dashboard({ showAlert }) {
                       </ul>
                     ) : (
                       <div style={{ 
-                        color: '#9ca3af',
+                        color: 'var(--text-muted)',
                         textAlign: 'center',
                         padding: '24px',
                         fontFamily: 'Segoe UI, sans-serif'
@@ -1111,7 +994,7 @@ function Dashboard({ showAlert }) {
                       <div style={{
                         marginTop: '16px',
                         paddingTop: '16px',
-                        borderTop: '2px solid #e5e7eb',
+                        borderTop: '2px solid var(--border-subtle)',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center'
@@ -1120,7 +1003,7 @@ function Dashboard({ showAlert }) {
                           fontFamily: 'Segoe UI, sans-serif',
                           fontSize: '0.875rem',
                           fontWeight: 600,
-                          color: '#1f2937',
+                          color: 'var(--text-primary)',
                           textTransform: 'uppercase',
                           letterSpacing: '0.5px'
                         }}>
@@ -1130,7 +1013,7 @@ function Dashboard({ showAlert }) {
                           fontFamily: 'Segoe UI, sans-serif',
                           fontSize: '1.5rem',
                           fontWeight: 700,
-                          color: expandedSaldo.valor > 0 ? '#10b981' : '#ef4444'
+                          color: expandedSaldo.valor > 0 ? 'var(--success)' : 'var(--danger)'
                         }}>
                           R$ {Math.abs(expandedSaldo.valor).toFixed(2).replace('.', ',')}
                         </div>
@@ -1155,7 +1038,7 @@ function Dashboard({ showAlert }) {
               fontWeight: 600,
               textTransform: 'uppercase',
               letterSpacing: '1px',
-              color: '#6b7280',
+              color: 'var(--text-muted)',
               margin: 0
             }}>configurações</h3>
           </div>
@@ -1282,7 +1165,7 @@ function Dashboard({ showAlert }) {
           <div style={{ 
             gridColumn: 'span 2',
             marginTop: '64px',
-            border: '2px dashed #e5e7eb',
+            border: '2px dashed var(--border-subtle)',
             padding: '48px',
             textAlign: 'center'
           }}>
@@ -1292,14 +1175,14 @@ function Dashboard({ showAlert }) {
               fontSize: '1.25rem',
               fontWeight: 300,
               textTransform: 'lowercase',
-              color: '#1f2937'
+              color: 'var(--text-primary)'
             }}>
               nenhuma despesa
             </h3>
             <p style={{ 
               fontFamily: 'Segoe UI, sans-serif',
               fontSize: '0.875rem',
-              color: '#6b7280'
+              color: 'var(--text-muted)'
             }}>
               cadastre streamings para começar
             </p>

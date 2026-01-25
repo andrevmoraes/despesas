@@ -7,27 +7,26 @@ import '../styles/forms.css'
 
 // Metro Colors (Windows Phone)
 const MetroColors = {
-  blue: '#0078D7',
-  green: '#00a300',
-  orange: '#ff8c00',
-  purple: '#a200ff',
-  red: '#e51400'
+  blue: 'var(--primary)',
+  green: 'var(--success)',
+  orange: 'var(--accent)',
+  purple: 'var(--wp-purple)',
+  red: 'var(--danger)'
 }
 
 // Metro Tile Component
-const MetroTile = ({ color, onClick, children, style }) => {
+const MetroTile = ({ color, onClick, children, style, className = '', hoverable = true }) => {
   return (
     <div 
-      className="metro-tile metro-tile-hoverable"
+      className={`metro-tile ${hoverable ? 'metro-tile--interactive' : ''} ${className}`}
       onClick={onClick}
       style={{ 
         backgroundColor: color,
         minHeight: '160px',
-        padding: '20px',
-        cursor: 'pointer',
-        position: 'relative',
         ...style 
       }}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
     >
       {children}
     </div>
@@ -313,55 +312,24 @@ function Streamings({ showAlert }) {
   }
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      backgroundColor: '#ffffff',
-      padding: '16px',
-      paddingBottom: '80px'
-    }}>
+    <div className="metro-page metro-page--with-nav">
       {/* Header Tile */}
       <MetroTile 
         color={MetroColors.blue}
-        style={{ marginBottom: '16px', cursor: 'default' }}
+        className="metro-tile-wide"
+        hoverable={false}
+        style={{ marginBottom: '16px' }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="metro-hero">
           <div style={{ flex: 1 }}>
-            <h1 style={{
-              fontFamily: 'Segoe UI, sans-serif',
-              fontSize: '3rem',
-              fontWeight: 300,
-              color: 'white',
-              margin: 0,
-              lineHeight: 1,
-              textTransform: 'lowercase',
-              letterSpacing: '-2px'
-            }}>
-              assinaturas
-            </h1>
-            <p style={{
-              fontFamily: 'Segoe UI, sans-serif',
-              fontSize: '0.875rem',
-              color: 'rgba(255, 255, 255, 0.9)',
-              margin: '8px 0 0 0',
-              textTransform: 'lowercase'
-            }}>
+            <h1 className="metro-hero__title">assinaturas</h1>
+            <p className="metro-hero__subtitle">
               {streamings.length} assinatura{streamings.length !== 1 ? 's' : ''} cadastrada{streamings.length !== 1 ? 's' : ''}
             </p>
           </div>
           <button
             onClick={() => navigate('/')}
-            style={{
-              width: '40px',
-              height: '40px',
-              backgroundColor: 'rgba(255, 255, 255, 0.2)',
-              border: 'none',
-              color: 'white',
-              fontSize: '1.25rem',
-              cursor: 'pointer',
-              transition: 'background-color 0.15s'
-            }}
-            onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'}
-            onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)'}
+            className="metro-icon-button"
           >
             ←
           </button>
@@ -369,35 +337,16 @@ function Streamings({ showAlert }) {
       </MetroTile>
 
       {/* Grid de Tiles */}
-      <div style={{ 
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-        gap: '16px'
-      }}>
+      <div className="metro-grid">
         {/* Tile Adicionar Nova Assinatura */}
         <MetroTile 
-          color="#e5e7eb"
+          color="var(--bg-secondary)"
+          className="metro-tile--muted"
           onClick={abrirNovo}
         >
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '100%',
-            textAlign: 'center'
-          }}>
-            <div style={{
-              fontSize: '3rem',
-              color: '#9ca3af',
-              marginBottom: '8px'
-            }}>+</div>
-            <span style={{
-              fontFamily: 'Segoe UI, sans-serif',
-              fontSize: '0.875rem',
-              color: '#6b7280',
-              textTransform: 'lowercase'
-            }}>adicionar assinatura</span>
+          <div className="metro-tile__center">
+            <div className="metro-tile__icon">+</div>
+            <span className="metro-tile__label">adicionar assinatura</span>
           </div>
         </MetroTile>
 
@@ -415,46 +364,22 @@ function Streamings({ showAlert }) {
               justifyContent: 'space-between'
             }}>
               <div>
-                <h3 style={{
-                  fontFamily: 'Segoe UI, sans-serif',
-                  fontSize: '1.25rem',
-                  fontWeight: 600,
-                  color: 'white',
-                  margin: '0 0 8px 0',
-                  textTransform: 'lowercase',
-                  wordBreak: 'break-word'
-                }}>
+                <h3 className="metro-tile__title">
                   {streaming.nome.toLowerCase()}
                 </h3>
                 
-                <p style={{
-                  fontFamily: 'Segoe UI, sans-serif',
-                  fontSize: '0.75rem',
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  margin: '0 0 4px 0'
-                }}>
+                <p className="metro-tile__meta">
                   pago por: {streaming.pagador?.nome || 'N/A'}
                 </p>
 
                 {streaming.divisoes && streaming.divisoes.length > 0 && (
-                  <p style={{
-                    fontFamily: 'Segoe UI, sans-serif',
-                    fontSize: '0.75rem',
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    margin: 0
-                  }}>
+                  <p className="metro-tile__meta">
                     {streaming.divisoes.length} perfil{streaming.divisoes.length !== 1 ? 's' : ''}
                   </p>
                 )}
               </div>
 
-              <div style={{
-                fontFamily: 'Segoe UI, sans-serif',
-                fontSize: '1.5rem',
-                fontWeight: 300,
-                color: 'white',
-                marginTop: '8px'
-              }}>
+              <div className="metro-tile__value">
                 R$ {Number(streaming.valor_total || 0).toFixed(2).replace('.', ',')}
               </div>
             </div>
@@ -464,50 +389,20 @@ function Streamings({ showAlert }) {
 
       {/* Modal */}
       {showModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 10000,
-          padding: '16px'
-        }}
-        onClick={() => setShowModal(false)}
-        >
+        <div className="metro-modal-overlay" onClick={() => setShowModal(false)}>
           <div 
-            style={{
-              backgroundColor: 'white',
-              width: '100%',
-              maxWidth: '500px',
-              maxHeight: '90vh',
-              overflow: 'auto'
-            }}
+            className="metro-modal"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div style={{
-              backgroundColor: MetroColors.blue,
-              padding: '24px',
-              color: 'white'
-            }}>
-              <h2 style={{
-                fontFamily: 'Segoe UI, sans-serif',
-                fontSize: '1.5rem',
-                fontWeight: 300,
-                margin: 0,
-                textTransform: 'lowercase'
-              }}>
+            <div className="metro-modal__header">
+              <h2 className="metro-modal__title">
                 {editando ? 'editar assinatura' : 'nova assinatura'}
               </h2>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
+            <form onSubmit={handleSubmit} className="metro-modal__body">
               <div className="form-group">
                 <label className="form-label">Nome</label>
                 <input
@@ -578,25 +473,13 @@ function Streamings({ showAlert }) {
                     required
                     style={{ flex: 1 }}
                   />
-                  <span style={{ 
-                    fontFamily: 'Segoe UI, sans-serif',
-                    fontSize: '0.875rem',
-                    color: '#6b7280',
-                    minWidth: '25px'
-                  }}>%</span>
+                  <span className="metro-text-muted" style={{ minWidth: '25px' }}>%</span>
                 </div>
               </div>
 
               <div className="form-group">
                 <label className="form-label">Dividir com:</label>
-                <div style={{
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '4px',
-                  padding: '12px',
-                  maxHeight: '200px',
-                  overflowY: 'auto',
-                  backgroundColor: '#f9fafb'
-                }}>
+                <div className="metro-list">
                   {users
                     .filter(u => u.id !== formData.pagador_id)
                     .map(u => {
@@ -606,34 +489,19 @@ function Streamings({ showAlert }) {
                       return (
                         <div 
                           key={u.id}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            padding: '8px',
-                            borderBottom: '1px solid #e5e7eb'
-                          }}
+                          className="metro-list__item"
                         >
-                          <label style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            cursor: 'pointer',
-                            fontFamily: 'Segoe UI, sans-serif',
-                            fontSize: '0.875rem',
-                            flex: 1
-                          }}>
+                          <label className="metro-list__label">
                             <input
                               type="checkbox"
                               checked={isChecked}
                               onChange={() => toggleDivisao(u.id)}
-                              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                             />
                             {u.nome}
                           </label>
                           
                           {isChecked && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <div className="metro-percentage">
                               <input
                                 type="number"
                                 step="0.01"
@@ -643,70 +511,31 @@ function Streamings({ showAlert }) {
                                 value={divisao.percentual || ''}
                                 onChange={(e) => atualizarPercentual(u.id, e.target.value)}
                                 onClick={(e) => e.stopPropagation()}
-                                style={{
-                                  width: '70px',
-                                  padding: '4px 8px',
-                                  border: '1px solid #d1d5db',
-                                  borderRadius: '4px',
-                                  fontFamily: 'Segoe UI, sans-serif',
-                                  fontSize: '0.875rem'
-                                }}
+                                className="form-input form-input--compact metro-input-compact"
                               />
-                              <span style={{ 
-                                fontFamily: 'Segoe UI, sans-serif',
-                                fontSize: '0.75rem',
-                                color: '#6b7280'
-                              }}>%</span>
+                              <span>%</span>
                             </div>
                           )}
                         </div>
                       )
                     })}
                   {users.filter(u => u.id !== formData.pagador_id).length === 0 && (
-                    <p style={{
-                      textAlign: 'center',
-                      color: '#6b7280',
-                      fontSize: '0.875rem',
-                      padding: '16px'
-                    }}>Nenhuma outra pessoa disponível</p>
+                    <p className="metro-list__empty">Nenhuma outra pessoa disponível</p>
                   )}
                 </div>
               </div>
 
               {/* Indicador do Total de Porcentagens */}
-              <div style={{
-                marginTop: '16px',
-                padding: '12px',
-                backgroundColor: calcularTotalPercentual() === 100 ? '#d1fae5' : '#fee2e2',
-                border: `2px solid ${calcularTotalPercentual() === 100 ? '#10b981' : '#ef4444'}`,
-                borderRadius: '4px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}>
-                <span style={{
-                  fontFamily: 'Segoe UI, sans-serif',
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                  color: calcularTotalPercentual() === 100 ? '#065f46' : '#991b1b'
-                }}>
+              <div className={`metro-callout ${calcularTotalPercentual() === 100 ? 'metro-callout--success' : 'metro-callout--danger'}`}>
+                <span className="metro-callout__label">
                   Total de Porcentagens:
                 </span>
-                <span style={{
-                  fontFamily: 'Segoe UI, sans-serif',
-                  fontSize: '1.25rem',
-                  fontWeight: 700,
-                  color: calcularTotalPercentual() === 100 ? '#065f46' : '#991b1b'
-                }}>
+                <span className="metro-callout__value">
                   {calcularTotalPercentual().toFixed(2)}%
                 </span>
               </div>
 
-              <div style={{ 
-                display: 'flex', 
-                gap: '8px',
-                marginTop: '24px'
-              }}>
+              <div className="metro-modal__actions">
                 {editando && (
                   <button
                     type="button"
@@ -716,17 +545,7 @@ function Streamings({ showAlert }) {
                         setShowModal(false)
                       }
                     }}
-                    style={{
-                      flex: 1,
-                      padding: '12px',
-                      backgroundColor: MetroColors.red,
-                      color: 'white',
-                      border: 'none',
-                      fontFamily: 'Segoe UI, sans-serif',
-                      fontSize: '0.875rem',
-                      textTransform: 'lowercase',
-                      cursor: 'pointer'
-                    }}
+                    className="btn btn--danger"
                   >
                     remover
                   </button>
@@ -734,35 +553,14 @@ function Streamings({ showAlert }) {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  style={{
-                    flex: 1,
-                    padding: '12px',
-                    backgroundColor: '#e5e7eb',
-                    color: '#1f2937',
-                    border: 'none',
-                    fontFamily: 'Segoe UI, sans-serif',
-                    fontSize: '0.875rem',
-                    textTransform: 'lowercase',
-                    cursor: 'pointer'
-                  }}
+                  className="btn btn--ghost"
                 >
                   cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  style={{
-                    flex: 1,
-                    padding: '12px',
-                    backgroundColor: MetroColors.blue,
-                    color: 'white',
-                    border: 'none',
-                    fontFamily: 'Segoe UI, sans-serif',
-                    fontSize: '0.875rem',
-                    textTransform: 'lowercase',
-                    cursor: loading ? 'not-allowed' : 'pointer',
-                    opacity: loading ? 0.6 : 1
-                  }}
+                  className="btn btn--primary"
                 >
                   {loading ? 'salvando...' : editando ? 'atualizar' : 'criar'}
                 </button>

@@ -4,6 +4,7 @@ import Alert from './components/Alert'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import DashboardSkeleton from './components/DashboardSkeleton'
 import './styles/global.css'
+import './styles/metro.css'
 import './styles/tiles.css'
 import './styles/buttons.css'
 import './styles/forms.css'
@@ -22,11 +23,11 @@ function AppContent() {
 
   if (error) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff', padding: '20px' }}>
-        <div style={{ textAlign: 'center', maxWidth: '400px' }}>
-          <h2 style={{ color: '#e51400', marginBottom: '16px' }}>Erro de Configuração</h2>
-          <p style={{ color: '#333', marginBottom: '20px' }}>{error}</p>
-          <p style={{ color: '#666', fontSize: '14px' }}>
+      <div className="metro-page metro-page--centered">
+        <div className="metro-panel metro-panel--plain" style={{ textAlign: 'center', maxWidth: '420px' }}>
+          <h2 className="metro-panel__title metro-title--danger" style={{ marginBottom: '16px' }}>Erro de Configuração</h2>
+          <p style={{ marginBottom: '20px' }}>{error}</p>
+          <p className="metro-text-muted" style={{ fontSize: '14px' }}>
             Verifique o arquivo <code>.env</code> na raiz do projeto e reinicie o servidor. Use <code>VITE_PUBLIC_SUPABASE_URL</code> e <code>VITE_PUBLIC_SUPABASE_ANON_KEY</code>.
           </p>
         </div>
@@ -41,15 +42,8 @@ function AppContent() {
   if (!user) {
     return (
       <Suspense fallback={
-        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff' }}>
-          <div style={{
-            width: '48px',
-            height: '48px',
-            border: '4px solid #e5e7eb',
-            borderTop: '4px solid #0078D7',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite'
-          }}></div>
+        <div className="metro-page metro-page--centered">
+          <div className="metro-spinner"></div>
         </div>
       }>
         <Login showAlert={showAlert} />
@@ -61,15 +55,8 @@ function AppContent() {
     <BrowserRouter>
       <Alert message={alert.message} type={alert.type} onClose={closeAlert} />
       <Suspense fallback={
-        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff' }}>
-          <div style={{
-            width: '48px',
-            height: '48px',
-            border: '4px solid #e5e7eb',
-            borderTop: '4px solid #0078D7',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite'
-          }}></div>
+        <div className="metro-page metro-page--centered">
+          <div className="metro-spinner"></div>
         </div>
       }>
         <Routes>
