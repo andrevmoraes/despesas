@@ -24,7 +24,7 @@ export default function BottomNav({ currentPage, onNavigate }) {
         onClick={() => onNavigate('users')}
       >
         <span className="bottom-nav__icon">👥</span>
-        <span>Usuários</span>
+        <span>Pessoas</span>
       </button>
     </nav>
   )

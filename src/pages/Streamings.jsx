@@ -2,14 +2,37 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../services/supabase'
 import { useAuth } from '../contexts/AuthContext'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, Plus, Pencil, Trash2, Calendar, DollarSign, Users, User } from 'lucide-react'
+import DashboardSkeleton from '../components/DashboardSkeleton'
+import '../styles/forms.css'
+
+// Metro Colors (Windows Phone)
+const MetroColors = {
+  blue: '#0078D7',
+  green: '#00a300',
+  orange: '#ff8c00',
+  purple: '#a200ff',
+  red: '#e51400'
+}
+
+// Metro Tile Component
+const MetroTile = ({ color, onClick, children, style }) => {
+  return (
+    <div 
+      className="metro-tile metro-tile-hoverable"
+      onClick={onClick}
+      style={{ 
+        backgroundColor: color,
+        minHeight: '160px',
+        padding: '20px',
+        cursor: 'pointer',
+        position: 'relative',
+        ...style 
+      }}
+    >
+      {children}
+    </div>
+  )
+}
 
 function Streamings({ showAlert }) {
   const { user } = useAuth()
@@ -24,7 +47,8 @@ function Streamings({ showAlert }) {
     valor_total: '',
     dia_cobranca: '',
     pagador_id: user?.id || '',
-    divisoes: []
+    pagador_percentual: 100,
+    divisoes: [] // Array de { user_id: string, percentual: number }
   })
 
   useEffect(() => {
@@ -63,15 +87,25 @@ function Streamings({ showAlert }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    
+    // Validar porcentagens
+    const totalPercentual = formData.pagador_percentual + formData.divisoes.reduce((sum, d) => sum + (d.percentual || 0), 0)
+    if (Math.abs(totalPercentual - 100) > 0.01) {
+      showAlert(`A soma das porcentagens deve ser 100%. Atualmente: ${totalPercentual.toFixed(1)}%`, 'error')
+      return
+    }
+
     setLoading(true)
 
     try {
+      const valorTotal = parseFloat(formData.valor_total)
+      
       if (editando) {
         const { error: streamingError } = await supabase
           .from('streamings')
           .update({
             nome: formData.nome,
-            valor_total: parseFloat(formData.valor_total),
+            valor_total: valorTotal,
             dia_cobranca: parseInt(formData.dia_cobranca, 10),
             pagador_id: formData.pagador_id
           })
@@ -86,27 +120,37 @@ function Streamings({ showAlert }) {
 
         if (deleteDivisoesError) throw deleteDivisoesError
 
-        if (formData.divisoes.length > 0) {
-          const divisoes = formData.divisoes.map(userId => ({
+        // Inserir divisão do pagador
+        const valorPagador = parseFloat(((valorTotal * formData.pagador_percentual) / 100).toFixed(2))
+        const divisoes = [{
+          streaming_id: editando.id,
+          user_id: formData.pagador_id,
+          valor_personalizado: valorPagador
+        }]
+
+        // Inserir divisões dos outros participantes
+        formData.divisoes.forEach(d => {
+          const valorParticipante = parseFloat(((valorTotal * d.percentual) / 100).toFixed(2))
+          divisoes.push({
             streaming_id: editando.id,
-            user_id: userId,
-            valor_personalizado: null
-          }))
+            user_id: d.user_id,
+            valor_personalizado: valorParticipante
+          })
+        })
 
-          const { error: divisoesError } = await supabase
-            .from('divisoes')
-            .insert(divisoes)
+        const { error: divisoesError } = await supabase
+          .from('divisoes')
+          .insert(divisoes)
 
-          if (divisoesError) throw divisoesError
-        }
+        if (divisoesError) throw divisoesError
 
-        showAlert('Streaming atualizado com sucesso', 'success')
+        showAlert('Assinatura atualizada com sucesso', 'success')
       } else {
         const { data: streaming, error: streamingError } = await supabase
           .from('streamings')
           .insert({
             nome: formData.nome,
-            valor_total: parseFloat(formData.valor_total),
+            valor_total: valorTotal,
             dia_cobranca: parseInt(formData.dia_cobranca, 10),
             pagador_id: formData.pagador_id,
             criado_por: user.id
@@ -116,21 +160,31 @@ function Streamings({ showAlert }) {
 
         if (streamingError) throw streamingError
 
-        if (formData.divisoes.length > 0) {
-          const divisoes = formData.divisoes.map(userId => ({
+        // Inserir divisão do pagador
+        const valorPagador = parseFloat(((valorTotal * formData.pagador_percentual) / 100).toFixed(2))
+        const divisoes = [{
+          streaming_id: streaming.id,
+          user_id: formData.pagador_id,
+          valor_personalizado: valorPagador
+        }]
+
+        // Inserir divisões dos outros participantes
+        formData.divisoes.forEach(d => {
+          const valorParticipante = parseFloat(((valorTotal * d.percentual) / 100).toFixed(2))
+          divisoes.push({
             streaming_id: streaming.id,
-            user_id: userId,
-            valor_personalizado: null
-          }))
+            user_id: d.user_id,
+            valor_personalizado: valorParticipante
+          })
+        })
 
-          const { error: divisoesError } = await supabase
-            .from('divisoes')
-            .insert(divisoes)
+        const { error: divisoesError } = await supabase
+          .from('divisoes')
+          .insert(divisoes)
 
-          if (divisoesError) throw divisoesError
-        }
+        if (divisoesError) throw divisoesError
 
-        showAlert('Streaming criado com sucesso', 'success')
+        showAlert('Assinatura criada com sucesso', 'success')
       }
 
       await carregarDados()
@@ -140,6 +194,7 @@ function Streamings({ showAlert }) {
         valor_total: '',
         dia_cobranca: '',
         pagador_id: user.id,
+        pagador_percentual: 100,
         divisoes: []
       })
       setEditando(null)
@@ -154,12 +209,28 @@ function Streamings({ showAlert }) {
 
   const abrirEdicao = (streaming) => {
     setEditando(streaming)
+    
+    // Calcular porcentagens baseadas nos valores personalizados
+    const valorTotal = parseFloat(streaming.valor_total) || 0
+    const divisaoPagador = (streaming.divisoes || []).find(d => d.user_id === streaming.pagador_id)
+    const pagadorPercentual = divisaoPagador && valorTotal > 0 
+      ? (parseFloat(divisaoPagador.valor_personalizado) / valorTotal) * 100
+      : 100
+    
+    const outrosDivisoes = (streaming.divisoes || [])
+      .filter(d => d.user_id !== streaming.pagador_id)
+      .map(d => ({
+        user_id: d.user_id,
+        percentual: valorTotal > 0 ? (parseFloat(d.valor_personalizado) / valorTotal) * 100 : 0
+      }))
+    
     setFormData({
       nome: streaming.nome,
       valor_total: streaming.valor_total?.toString() || '',
       dia_cobranca: streaming.dia_cobranca?.toString() || '',
       pagador_id: streaming.pagador_id,
-      divisoes: (streaming.divisoes || []).map(d => d.user_id)
+      pagador_percentual: pagadorPercentual,
+      divisoes: outrosDivisoes
     })
     setShowModal(true)
   }
@@ -171,13 +242,14 @@ function Streamings({ showAlert }) {
       valor_total: '',
       dia_cobranca: '',
       pagador_id: user.id,
+      pagador_percentual: 100,
       divisoes: []
     })
     setShowModal(true)
   }
 
   const deletarStreaming = async (id) => {
-    if (!confirm('Tem certeza que deseja deletar este streaming?')) return
+    if (!confirm('Tem certeza que deseja remover esta assinatura?')) return
 
     try {
       const { error } = await supabase
@@ -187,275 +259,518 @@ function Streamings({ showAlert }) {
 
       if (error) throw error
 
-      showAlert('Streaming deletado com sucesso', 'success')
+      showAlert('Assinatura removida com sucesso', 'success')
       await carregarDados()
     } catch (error) {
       console.error('Erro ao deletar streaming:', error)
-      showAlert('Erro ao deletar streaming', 'error')
+      showAlert('Erro ao remover assinatura', 'error')
     }
   }
 
   const toggleDivisao = (userId) => {
-    setFormData(prev => ({
-      ...prev,
-      divisoes: prev.divisoes.includes(userId)
-        ? prev.divisoes.filter(id => id !== userId)
-        : [...prev.divisoes, userId]
-    }))
+    setFormData(prev => {
+      const divisaoExiste = prev.divisoes.some(d => d.user_id === userId)
+      
+      if (divisaoExiste) {
+        return {
+          ...prev,
+          divisoes: prev.divisoes.filter(d => d.user_id !== userId)
+        }
+      } else {
+        return {
+          ...prev,
+          divisoes: [...prev.divisoes, { user_id: userId, percentual: 0 }]
+        }
+      }
+    })
+  }
+
+  const atualizarPercentual = (userId, percentual) => {
+    const percentualNum = parseFloat(percentual) || 0
+    
+    if (userId === formData.pagador_id) {
+      setFormData(prev => ({
+        ...prev,
+        pagador_percentual: percentualNum
+      }))
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        divisoes: prev.divisoes.map(d => 
+          d.user_id === userId ? { ...d, percentual: percentualNum } : d
+        )
+      }))
+    }
+  }
+
+  const calcularTotalPercentual = () => {
+    const totalOutros = formData.divisoes.reduce((sum, d) => sum + (parseFloat(d.percentual) || 0), 0)
+    return (parseFloat(formData.pagador_percentual) || 0) + totalOutros
   }
 
   if (loading && streamings.length === 0) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff' }}>
-        <div style={{
-          width: '48px',
-          height: '48px',
-          border: '4px solid #e5e7eb',
-          borderTop: '4px solid #0078D7',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite'
-        }}></div>
-      </div>
-    )
+    return <DashboardSkeleton />
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="mx-auto max-w-6xl space-y-8">
-        {/* Header */}
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <Button onClick={() => navigate('/')} variant="outline" size="icon" className="h-12 w-12">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h1 className="text-2xl font-semibold text-gray-900">Assinaturas</h1>
-              <p className="text-sm text-gray-500">{streamings.length} assinatura{streamings.length !== 1 ? 's' : ''} cadastrada{streamings.length !== 1 ? 's' : ''}</p>
-            </div>
+    <div style={{ 
+      minHeight: '100vh', 
+      backgroundColor: '#ffffff',
+      padding: '16px',
+      paddingBottom: '80px'
+    }}>
+      {/* Header Tile */}
+      <MetroTile 
+        color={MetroColors.blue}
+        style={{ marginBottom: '16px', cursor: 'default' }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ flex: 1 }}>
+            <h1 style={{
+              fontFamily: 'Segoe UI, sans-serif',
+              fontSize: '3rem',
+              fontWeight: 300,
+              color: 'white',
+              margin: 0,
+              lineHeight: 1,
+              textTransform: 'lowercase',
+              letterSpacing: '-2px'
+            }}>
+              assinaturas
+            </h1>
+            <p style={{
+              fontFamily: 'Segoe UI, sans-serif',
+              fontSize: '0.875rem',
+              color: 'rgba(255, 255, 255, 0.9)',
+              margin: '8px 0 0 0',
+              textTransform: 'lowercase'
+            }}>
+              {streamings.length} assinatura{streamings.length !== 1 ? 's' : ''} cadastrada{streamings.length !== 1 ? 's' : ''}
+            </p>
           </div>
-          <Button onClick={abrirNovo} className="h-12 px-6 text-base">
-            <Plus className="mr-2 h-5 w-5" />
-            Adicionar Assinatura
-          </Button>
+          <button
+            onClick={() => navigate('/')}
+            style={{
+              width: '40px',
+              height: '40px',
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              border: 'none',
+              color: 'white',
+              fontSize: '1.25rem',
+              cursor: 'pointer',
+              transition: 'background-color 0.15s'
+            }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)'}
+          >
+            ←
+          </button>
         </div>
+      </MetroTile>
 
-        {/* Cards Grid */}
-        {streamings.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="mb-4 rounded-full bg-gray-100 p-4">
-                <DollarSign className="h-8 w-8 text-gray-400" />
-              </div>
-              <h3 className="mb-2 text-lg font-medium text-gray-900">Nenhuma assinatura cadastrada</h3>
-              <p className="mb-6 text-sm text-gray-500">
-                Comece adicionando sua primeira assinatura
-              </p>
-              <Button onClick={abrirNovo} className="h-12 px-6">
-                <Plus className="mr-2 h-5 w-5" />
-                Adicionar Assinatura
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {streamings.map((streaming) => (
-              <Card 
-                key={streaming.id}
-                className="group cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] border-2"
-                onClick={() => abrirEdicao(streaming)}
-              >
-                <CardContent className="p-6 space-y-4">
-                  {/* Header */}
-                  <div className="space-y-2">
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="font-semibold text-lg text-gray-900 line-clamp-1 group-hover:text-blue-600 transition-colors">
-                        {streaming.nome}
-                      </h3>
-                      <Badge variant="secondary" className="font-mono text-sm px-2.5 py-1 shrink-0">
-                        R$ {Number(streaming.valor_total || 0).toFixed(2)}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  {/* Info */}
-                  <div className="space-y-3 text-sm">
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <User className="h-4 w-4 shrink-0" />
-                      <span className="truncate">{streaming.pagador?.nome}</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 text-gray-600">
-                      <Calendar className="h-4 w-4 shrink-0" />
-                      <span>Cobrança dia {streaming.dia_cobranca}</span>
-                    </div>
-
-                    {streaming.divisoes && streaming.divisoes.length > 0 && (
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <Users className="h-4 w-4 shrink-0" />
-                        <span>Dividida com {streaming.divisoes.length} pessoa{streaming.divisoes.length !== 1 ? 's' : ''}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Delete Button */}
-                  <div className="pt-2 border-t">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full text-red-500 hover:text-red-700 hover:bg-red-50"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        deletarStreaming(streaming.id)
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Excluir
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+      {/* Grid de Tiles */}
+      <div style={{ 
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+        gap: '16px'
+      }}>
+        {/* Tile Adicionar Nova Assinatura */}
+        <MetroTile 
+          color="#e5e7eb"
+          onClick={abrirNovo}
+        >
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%',
+            textAlign: 'center'
+          }}>
+            <div style={{
+              fontSize: '3rem',
+              color: '#9ca3af',
+              marginBottom: '8px'
+            }}>+</div>
+            <span style={{
+              fontFamily: 'Segoe UI, sans-serif',
+              fontSize: '0.875rem',
+              color: '#6b7280',
+              textTransform: 'lowercase'
+            }}>adicionar assinatura</span>
           </div>
-        )}
+        </MetroTile>
+
+        {/* Tiles de Assinaturas */}
+        {streamings.map((streaming) => (
+          <MetroTile 
+            key={streaming.id}
+            color={MetroColors.blue}
+            onClick={() => abrirEdicao(streaming)}
+          >
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              height: '100%',
+              justifyContent: 'space-between'
+            }}>
+              <div>
+                <h3 style={{
+                  fontFamily: 'Segoe UI, sans-serif',
+                  fontSize: '1.25rem',
+                  fontWeight: 600,
+                  color: 'white',
+                  margin: '0 0 8px 0',
+                  textTransform: 'lowercase',
+                  wordBreak: 'break-word'
+                }}>
+                  {streaming.nome.toLowerCase()}
+                </h3>
+                
+                <p style={{
+                  fontFamily: 'Segoe UI, sans-serif',
+                  fontSize: '0.75rem',
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  margin: '0 0 4px 0'
+                }}>
+                  pago por: {streaming.pagador?.nome || 'N/A'}
+                </p>
+
+                {streaming.divisoes && streaming.divisoes.length > 0 && (
+                  <p style={{
+                    fontFamily: 'Segoe UI, sans-serif',
+                    fontSize: '0.75rem',
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    margin: 0
+                  }}>
+                    {streaming.divisoes.length} perfil{streaming.divisoes.length !== 1 ? 's' : ''}
+                  </p>
+                )}
+              </div>
+
+              <div style={{
+                fontFamily: 'Segoe UI, sans-serif',
+                fontSize: '1.5rem',
+                fontWeight: 300,
+                color: 'white',
+                marginTop: '8px'
+              }}>
+                R$ {Number(streaming.valor_total || 0).toFixed(2).replace('.', ',')}
+              </div>
+            </div>
+          </MetroTile>
+        ))}
       </div>
 
       {/* Modal */}
-      <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent onClose={() => setShowModal(false)} className="max-w-lg">
-          <DialogHeader className="space-y-3 pb-6 border-b">
-            <DialogTitle className="text-2xl">
-              {editando ? 'Editar Assinatura' : 'Nova Assinatura'}
-            </DialogTitle>
-            <DialogDescription className="text-base">
-              {editando 
-                ? 'Atualize as informações da assinatura' 
-                : 'Preencha os dados para criar uma nova assinatura'
-              }
-            </DialogDescription>
-          </DialogHeader>
-
-          <form onSubmit={handleSubmit} className="space-y-6 pt-6">
-            {/* Nome */}
-            <div className="space-y-3">
-              <Label htmlFor="nome" className="text-base font-semibold text-gray-700">
-                Nome da Assinatura
-              </Label>
-              <Input
-                id="nome"
-                placeholder="Ex: Netflix, Spotify, Disney+"
-                value={formData.nome}
-                onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-                className="h-14 text-base border-2 border-gray-200 focus:border-blue-500 transition-colors"
-                required
-              />
+      {showModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10000,
+          padding: '16px'
+        }}
+        onClick={() => setShowModal(false)}
+        >
+          <div 
+            style={{
+              backgroundColor: 'white',
+              width: '100%',
+              maxWidth: '500px',
+              maxHeight: '90vh',
+              overflow: 'auto'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div style={{
+              backgroundColor: MetroColors.blue,
+              padding: '24px',
+              color: 'white'
+            }}>
+              <h2 style={{
+                fontFamily: 'Segoe UI, sans-serif',
+                fontSize: '1.5rem',
+                fontWeight: 300,
+                margin: 0,
+                textTransform: 'lowercase'
+              }}>
+                {editando ? 'editar assinatura' : 'nova assinatura'}
+              </h2>
             </div>
 
-            {/* Valor e Dia */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <Label htmlFor="valor" className="text-base font-semibold text-gray-700">
-                  Valor Mensal
-                </Label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">R$</span>
-                  <Input
-                    id="valor"
+            {/* Form */}
+            <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
+              <div className="form-group">
+                <label className="form-label">Nome</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="Ex: Netflix, Spotify, Disney+"
+                  value={formData.nome}
+                  onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div className="form-group">
+                  <label className="form-label">Valor Mensal</label>
+                  <input
                     type="number"
                     step="0.01"
+                    className="form-input"
                     placeholder="39.90"
                     value={formData.valor_total}
                     onChange={(e) => setFormData({ ...formData, valor_total: e.target.value })}
-                    className="h-14 text-base pl-12 border-2 border-gray-200 focus:border-blue-500 transition-colors"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Dia da Cobrança</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="31"
+                    className="form-input"
+                    placeholder="15"
+                    value={formData.dia_cobranca}
+                    onChange={(e) => setFormData({ ...formData, dia_cobranca: e.target.value })}
                     required
                   />
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <Label htmlFor="dia" className="text-base font-semibold text-gray-700">
-                  Dia da Cobrança
-                </Label>
-                <Input
-                  id="dia"
-                  type="number"
-                  min="1"
-                  max="31"
-                  placeholder="15"
-                  value={formData.dia_cobranca}
-                  onChange={(e) => setFormData({ ...formData, dia_cobranca: e.target.value })}
-                  className="h-14 text-base border-2 border-gray-200 focus:border-blue-500 transition-colors"
+              <div className="form-group">
+                <label className="form-label">Quem paga?</label>
+                <select
+                  className="form-input"
+                  value={formData.pagador_id}
+                  onChange={(e) => setFormData({ ...formData, pagador_id: e.target.value })}
                   required
-                />
-              </div>
-            </div>
-
-            {/* Pagador */}
-            <div className="space-y-3">
-              <Label htmlFor="pagador" className="text-base font-semibold text-gray-700">
-                Quem paga?
-              </Label>
-              <select
-                id="pagador"
-                value={formData.pagador_id}
-                onChange={(e) => setFormData({ ...formData, pagador_id: e.target.value })}
-                className="flex h-14 w-full rounded-md border-2 border-gray-200 bg-white px-4 text-base shadow-sm transition-colors focus:border-blue-500 focus:outline-none"
-                required
-              >
-                {users.map(u => (
-                  <option key={u.id} value={u.id}>{u.nome}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Divisões */}
-            <div className="space-y-3">
-              <Label className="text-base font-semibold text-gray-700">
-                Dividir com:
-              </Label>
-              <div className="rounded-xl border-2 border-gray-200 bg-gray-50 p-4 space-y-2 max-h-48 overflow-y-auto">
-                {users
-                  .filter(u => u.id !== formData.pagador_id)
-                  .map(u => (
-                    <label 
-                      key={u.id} 
-                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-white transition-colors cursor-pointer"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={formData.divisoes.includes(u.id)}
-                        onChange={() => toggleDivisao(u.id)}
-                        className="h-5 w-5 rounded border-2 border-gray-300 cursor-pointer"
-                      />
-                      <span className="text-base text-gray-700">{u.nome}</span>
-                    </label>
+                >
+                  {users.map(u => (
+                    <option key={u.id} value={u.id}>{u.nome}</option>
                   ))}
-                {users.filter(u => u.id !== formData.pagador_id).length === 0 && (
-                  <p className="text-base text-gray-500 text-center py-4">Nenhum outro usuário disponível</p>
-                )}
+                </select>
               </div>
-            </div>
 
-            {/* Botões */}
-            <div className="flex gap-4 pt-6 border-t-2">
-              <Button 
-                type="button"
-                variant="outline"
-                onClick={() => setShowModal(false)}
-                className="flex-1 h-14 text-base border-2 hover:bg-gray-50"
-              >
-                Cancelar
-              </Button>
-              <Button 
-                type="submit"
-                disabled={loading}
-                className="flex-1 h-14 text-base bg-blue-600 hover:bg-blue-700"
-              >
-                {loading ? 'Salvando...' : editando ? 'Atualizar' : 'Criar'}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+              <div className="form-group">
+                <label className="form-label">Porcentagem do pagador</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="100"
+                    className="form-input"
+                    placeholder="100"
+                    value={formData.pagador_percentual}
+                    onChange={(e) => atualizarPercentual(formData.pagador_id, e.target.value)}
+                    required
+                    style={{ flex: 1 }}
+                  />
+                  <span style={{ 
+                    fontFamily: 'Segoe UI, sans-serif',
+                    fontSize: '0.875rem',
+                    color: '#6b7280',
+                    minWidth: '25px'
+                  }}>%</span>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Dividir com:</label>
+                <div style={{
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '4px',
+                  padding: '12px',
+                  maxHeight: '200px',
+                  overflowY: 'auto',
+                  backgroundColor: '#f9fafb'
+                }}>
+                  {users
+                    .filter(u => u.id !== formData.pagador_id)
+                    .map(u => {
+                      const divisao = formData.divisoes.find(d => d.user_id === u.id)
+                      const isChecked = !!divisao
+                      
+                      return (
+                        <div 
+                          key={u.id}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '8px',
+                            borderBottom: '1px solid #e5e7eb'
+                          }}
+                        >
+                          <label style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer',
+                            fontFamily: 'Segoe UI, sans-serif',
+                            fontSize: '0.875rem',
+                            flex: 1
+                          }}>
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => toggleDivisao(u.id)}
+                              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                            />
+                            {u.nome}
+                          </label>
+                          
+                          {isChecked && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="100"
+                                placeholder="0"
+                                value={divisao.percentual || ''}
+                                onChange={(e) => atualizarPercentual(u.id, e.target.value)}
+                                onClick={(e) => e.stopPropagation()}
+                                style={{
+                                  width: '70px',
+                                  padding: '4px 8px',
+                                  border: '1px solid #d1d5db',
+                                  borderRadius: '4px',
+                                  fontFamily: 'Segoe UI, sans-serif',
+                                  fontSize: '0.875rem'
+                                }}
+                              />
+                              <span style={{ 
+                                fontFamily: 'Segoe UI, sans-serif',
+                                fontSize: '0.75rem',
+                                color: '#6b7280'
+                              }}>%</span>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  {users.filter(u => u.id !== formData.pagador_id).length === 0 && (
+                    <p style={{
+                      textAlign: 'center',
+                      color: '#6b7280',
+                      fontSize: '0.875rem',
+                      padding: '16px'
+                    }}>Nenhuma outra pessoa disponível</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Indicador do Total de Porcentagens */}
+              <div style={{
+                marginTop: '16px',
+                padding: '12px',
+                backgroundColor: calcularTotalPercentual() === 100 ? '#d1fae5' : '#fee2e2',
+                border: `2px solid ${calcularTotalPercentual() === 100 ? '#10b981' : '#ef4444'}`,
+                borderRadius: '4px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <span style={{
+                  fontFamily: 'Segoe UI, sans-serif',
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  color: calcularTotalPercentual() === 100 ? '#065f46' : '#991b1b'
+                }}>
+                  Total de Porcentagens:
+                </span>
+                <span style={{
+                  fontFamily: 'Segoe UI, sans-serif',
+                  fontSize: '1.25rem',
+                  fontWeight: 700,
+                  color: calcularTotalPercentual() === 100 ? '#065f46' : '#991b1b'
+                }}>
+                  {calcularTotalPercentual().toFixed(2)}%
+                </span>
+              </div>
+
+              <div style={{ 
+                display: 'flex', 
+                gap: '8px',
+                marginTop: '24px'
+              }}>
+                {editando && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirm('Tem certeza que deseja remover esta assinatura?')) {
+                        deletarStreaming(editando.id)
+                        setShowModal(false)
+                      }
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      backgroundColor: MetroColors.red,
+                      color: 'white',
+                      border: 'none',
+                      fontFamily: 'Segoe UI, sans-serif',
+                      fontSize: '0.875rem',
+                      textTransform: 'lowercase',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    remover
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  style={{
+                    flex: 1,
+                    padding: '12px',
+                    backgroundColor: '#e5e7eb',
+                    color: '#1f2937',
+                    border: 'none',
+                    fontFamily: 'Segoe UI, sans-serif',
+                    fontSize: '0.875rem',
+                    textTransform: 'lowercase',
+                    cursor: 'pointer'
+                  }}
+                >
+                  cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  style={{
+                    flex: 1,
+                    padding: '12px',
+                    backgroundColor: MetroColors.blue,
+                    color: 'white',
+                    border: 'none',
+                    fontFamily: 'Segoe UI, sans-serif',
+                    fontSize: '0.875rem',
+                    textTransform: 'lowercase',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    opacity: loading ? 0.6 : 1
+                  }}
+                >
+                  {loading ? 'salvando...' : editando ? 'atualizar' : 'criar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

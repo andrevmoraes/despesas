@@ -920,7 +920,8 @@ function Dashboard({ showAlert }) {
                           border: '2px solid ' + MetroColors.blue,
                           zIndex: 9999,
                           animation: 'scaleFromOrigin 0.15s ease-out',
-                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                          minWidth: '200px'
                         }}
                         onClick={(e) => e.stopPropagation()}
                       >
@@ -936,10 +937,10 @@ function Dashboard({ showAlert }) {
                             background: 'transparent',
                             border: 'none',
                             color: '#1f2937',
-                            padding: '10px 16px',
+                            padding: '16px 20px',
                             textAlign: 'left',
                             cursor: 'pointer',
-                            fontSize: '0.75rem',
+                            fontSize: '1rem',
                             fontFamily: 'Segoe UI, sans-serif',
                             textTransform: 'lowercase',
                             transition: 'background 0.15s',
@@ -969,10 +970,10 @@ function Dashboard({ showAlert }) {
                             background: 'transparent',
                             border: 'none',
                             color: '#1f2937',
-                            padding: '10px 16px',
+                            padding: '16px 20px',
                             textAlign: 'left',
                             cursor: 'pointer',
-                            fontSize: '0.75rem',
+                            fontSize: '1rem',
                             fontFamily: 'Segoe UI, sans-serif',
                             textTransform: 'lowercase',
                             transition: 'background 0.15s',
@@ -1002,10 +1003,10 @@ function Dashboard({ showAlert }) {
                             background: 'transparent',
                             border: 'none',
                             color: '#1f2937',
-                            padding: '10px 16px',
+                            padding: '16px 20px',
                             textAlign: 'left',
                             cursor: 'pointer',
-                            fontSize: '0.75rem',
+                            fontSize: '1rem',
                             fontFamily: 'Segoe UI, sans-serif',
                             textTransform: 'lowercase',
                             transition: 'background 0.15s',
@@ -1035,14 +1036,13 @@ function Dashboard({ showAlert }) {
                             background: 'transparent',
                             border: 'none',
                             color: '#1f2937',
-                            padding: '10px 16px',
+                            padding: '16px 20px',
                             textAlign: 'left',
                             cursor: 'pointer',
-                            fontSize: '0.75rem',
+                            fontSize: '1rem',
                             fontFamily: 'Segoe UI, sans-serif',
                             textTransform: 'lowercase',
                             transition: 'background 0.15s',
-                            borderBottom: '1px solid #e5e7eb',
                             whiteSpace: 'nowrap'
                           }}
                           onMouseEnter={(e) => { 
@@ -1218,7 +1218,7 @@ function Dashboard({ showAlert }) {
             </div>
           </MetroTile>
 
-          {/* Tile de Usuários */}
+          {/* Tile de Pessoas */}
           <MetroTile 
             color={MetroColors.blue} 
             size="medium"
@@ -1233,7 +1233,7 @@ function Dashboard({ showAlert }) {
                 color: 'white',
                 margin: 0
               }}>
-                usuários
+                pessoas
               </h2>
               <p style={{ 
                 marginTop: '4px',
@@ -1242,7 +1242,7 @@ function Dashboard({ showAlert }) {
                 color: 'rgba(255, 255, 255, 0.9)',
                 margin: 0
               }}>
-                gerenciar pessoas
+                gerenciar grupo
               </p>
             </div>
           </MetroTile>

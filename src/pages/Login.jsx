@@ -11,18 +11,18 @@ function Login({ showAlert }) {
 
   const formatarTelefone = (value) => {
     // Remove tudo que não é número
-    const numbers = value.replace(/\D/g, '')
+    let numbers = value.replace(/\D/g, '')
+    
+    // Se começa com 1, mantém; senão, adiciona 1 no início
+    if (numbers.length > 0 && !numbers.startsWith('1')) {
+      numbers = '1' + numbers
+    }
+    
+    // Limita a 11 dígitos (1 + DDD + 8 dígitos)
+    numbers = numbers.slice(0, 11)
     
     // Formata (XX) XXXXX-XXXX
-    if (numbers.length <= 11) {
-      return numbers
-        .replace(/^(\d{2})(\d)/g, '($1) $2')
-        .replace(/(\d{5})(\d)/, '$1-$2')
-    }
-
-    // Se ultrapassar, recorta para os 11 primeiros dígitos e formata
-    const trimmed = numbers.slice(0, 11)
-    return trimmed
+    return numbers
       .replace(/^(\d{2})(\d)/g, '($1) $2')
       .replace(/(\d{5})(\d)/, '$1-$2')
   }
@@ -78,13 +78,13 @@ function Login({ showAlert }) {
             <input
               type="tel"
               className="form-input"
-              placeholder="(00) 00000-0000"
+              placeholder="(11) 99999-9999"
               value={telefone}
               onChange={(e) => setTelefone(formatarTelefone(e.target.value))}
               disabled={loading}
             />
             <div className="form-helper">
-              Digite seu número de telefone cadastrado
+              Digite seu número de telefone (DDD + número)
             </div>
           </div>
 

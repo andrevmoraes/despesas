@@ -14,8 +14,15 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
+    if (!supabase) {
+      setError('Configuração do Supabase incompleta. Verifique se o arquivo .env está configurado com VITE_PUBLIC_SUPABASE_URL e VITE_PUBLIC_SUPABASE_ANON_KEY.')
+      setLoading(false)
+      return
+    }
+
     // Verifica se há usuário logado no localStorage
     const storedUser = localStorage.getItem('user')
     if (storedUser) {
@@ -25,6 +32,10 @@ export const AuthProvider = ({ children }) => {
   }, [])
 
   const login = async (telefone) => {
+    if (!supabase) {
+      return { success: false, error: 'Supabase não configurado.' }
+    }
+
     try {
       // Busca usuário pelo telefone
       const { data, error } = await supabase
@@ -56,6 +67,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     user,
     loading,
+    error,
     login,
     logout,
     isAdmin: user?.is_admin || false

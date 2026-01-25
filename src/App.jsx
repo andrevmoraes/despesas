@@ -14,11 +14,25 @@ const Streamings = lazy(() => import('./pages/Streamings'))
 const Users = lazy(() => import('./pages/Users'))
 
 function AppContent() {
-  const { user, loading } = useAuth()
+  const { user, loading, error } = useAuth()
   const [alert, setAlert] = useState({ message: '', type: 'info' })
 
   const showAlert = (message, type = 'info') => setAlert({ message, type })
   const closeAlert = () => setAlert({ message: '', type: 'info' })
+
+  if (error) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#ffffff', padding: '20px' }}>
+        <div style={{ textAlign: 'center', maxWidth: '400px' }}>
+          <h2 style={{ color: '#e51400', marginBottom: '16px' }}>Erro de Configuração</h2>
+          <p style={{ color: '#333', marginBottom: '20px' }}>{error}</p>
+          <p style={{ color: '#666', fontSize: '14px' }}>
+            Verifique o arquivo <code>.env</code> na raiz do projeto e reinicie o servidor. Use <code>VITE_PUBLIC_SUPABASE_URL</code> e <code>VITE_PUBLIC_SUPABASE_ANON_KEY</code>.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   if (loading) {
     return <DashboardSkeleton />
