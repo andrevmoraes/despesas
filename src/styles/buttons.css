@@ -1,12 +1,12 @@
 .btn {
   padding: var(--spacing-md) var(--spacing-lg);
   font-weight: var(--font-weight-semibold);
-  border: none;
+  border: 2px solid transparent;
   border-radius: 0;
   cursor: pointer;
-  transition: opacity var(--transition-fast);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  transition: opacity var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+  text-transform: none;
+  letter-spacing: 0.2px;
   font-size: 0.875rem;
   display: inline-flex;
   align-items: center;
@@ -14,13 +14,22 @@
   gap: var(--spacing-sm);
 }
 
+.btn:hover {
+  opacity: var(--state-hover-opacity);
+}
+
 .btn:active {
-  opacity: 0.8;
+  opacity: var(--state-pressed-opacity);
 }
 
 .btn:disabled {
-  opacity: 0.5;
+  opacity: var(--state-disabled-opacity);
   cursor: not-allowed;
+}
+
+.btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: 2px;
 }
 
 .btn--primary {
@@ -46,6 +55,7 @@
 .btn--ghost {
   background-color: var(--bg-secondary);
   color: var(--text-primary);
+  border-color: var(--border-subtle);
 }
 
 .btn--block {

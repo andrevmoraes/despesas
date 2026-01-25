@@ -46,6 +46,11 @@
   cursor:pointer;
 }
 
+.pivot__header:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: 4px;
+}
+
 .pivot__header--active{
   font-size:52px;
   font-weight:600;

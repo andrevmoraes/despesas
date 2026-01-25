@@ -3,15 +3,24 @@
   border: none;
   border-radius: 0;
   padding: var(--spacing-lg);
-  transition: opacity var(--transition-fast);
+  transition: opacity var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
   cursor: default;
   position: relative;
   overflow: hidden;
   margin: 0;
 }
 
+.tile:hover {
+  box-shadow: var(--shadow-elevated);
+}
+
 .tile:active {
-  opacity: 0.8;
+  opacity: var(--state-pressed-opacity);
+}
+
+.tile:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: 2px;
 }
 
 .tile--primary {
@@ -65,6 +74,7 @@
   margin-bottom: var(--spacing-sm);
   color: #ffffff;
   letter-spacing: -0.3px;
+  text-transform: lowercase;
 }
 
 .tile__subtitle {
@@ -72,6 +82,7 @@
   color: #ffffff;
   font-weight: var(--font-weight-regular);
   opacity: 0.95;
+  text-transform: lowercase;
 }
 
 .tile__value {

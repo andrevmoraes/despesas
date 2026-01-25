@@ -6,14 +6,14 @@ function DashboardSkeleton() {
   const configTiles = [1, 2, 3, 4]
 
   return (
-    <div style={{ backgroundColor: '#ffffff', minHeight: '100vh' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '12px' }}>
+    <div className="metro-page">
+      <div className="metro-page__content" style={{ padding: '12px' }}>
         
         {/* Performance Bar - estilo Windows Phone */}
-        <div style={{ 
-          height: '2px', 
+        <div style={{
+          height: '2px',
           width: '100%',
-          backgroundColor: '#e5e7eb',
+          backgroundColor: 'var(--border-subtle)',
           marginBottom: '12px',
           overflow: 'hidden'
         }}>
@@ -22,7 +22,7 @@ function DashboardSkeleton() {
             style={{ 
               height: '100%',
               width: '30%',
-              background: 'linear-gradient(to right, transparent, #0078D7, transparent)'
+              background: 'linear-gradient(to right, transparent, var(--primary), transparent)'
             }}
           />
         </div>

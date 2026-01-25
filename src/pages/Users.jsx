@@ -7,28 +7,27 @@ import '../styles/forms.css'
 
 // Metro Colors (Windows Phone)
 const MetroColors = {
-  blue: '#0078D7',
-  green: '#00a300',
-  orange: '#ff8c00',
-  purple: '#a200ff',
-  red: '#e51400',
-  yellow: '#ffb900'
+  blue: 'var(--primary)',
+  green: 'var(--success)',
+  orange: 'var(--accent)',
+  purple: 'var(--wp-purple)',
+  red: 'var(--danger)',
+  yellow: 'var(--wp-lime)'
 }
 
 // Metro Tile Component
-const MetroTile = ({ color, onClick, children, style }) => {
+const MetroTile = ({ color, onClick, children, style, className = '', hoverable = true }) => {
   return (
     <div 
-      className="metro-tile metro-tile-hoverable"
+      className={`metro-tile ${hoverable ? 'metro-tile--interactive' : ''} ${className}`}
       onClick={onClick}
       style={{ 
         backgroundColor: color,
         minHeight: '160px',
-        padding: '20px',
-        cursor: 'pointer',
-        position: 'relative',
         ...style 
       }}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
     >
       {children}
     </div>
@@ -183,47 +182,13 @@ function Users({ showAlert }) {
 
   if (!isAdmin) {
     return (
-      <div style={{ 
-        minHeight: '100vh', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        backgroundColor: '#ffffff',
-        padding: '24px'
-      }}>
-        <div style={{
-          maxWidth: '400px',
-          textAlign: 'center'
-        }}>
-          <h2 style={{
-            fontFamily: 'Segoe UI, sans-serif',
-            fontSize: '1.5rem',
-            fontWeight: 300,
-            color: '#1f2937',
-            marginBottom: '16px'
-          }}>acesso negado</h2>
-          <p style={{
-            fontFamily: 'Segoe UI, sans-serif',
-            fontSize: '0.875rem',
-            color: '#6b7280',
-            marginBottom: '24px'
-          }}>apenas administradores podem gerenciar pessoas</p>
+      <div className="metro-page metro-page--centered">
+        <div className="metro-panel metro-panel--plain" style={{ textAlign: 'center', maxWidth: '420px' }}>
+          <h2 className="metro-panel__title">acesso negado</h2>
+          <p className="metro-text-muted" style={{ marginBottom: '24px' }}>apenas administradores podem gerenciar pessoas</p>
           <button
             onClick={() => navigate('/')}
-            style={{
-              width: '100%',
-              padding: '12px 24px',
-              backgroundColor: MetroColors.blue,
-              color: 'white',
-              border: 'none',
-              fontFamily: 'Segoe UI, sans-serif',
-              fontSize: '0.875rem',
-              textTransform: 'lowercase',
-              cursor: 'pointer',
-              transition: 'opacity 0.15s'
-            }}
-            onMouseEnter={(e) => e.target.style.opacity = '0.9'}
-            onMouseLeave={(e) => e.target.style.opacity = '1'}
+            className="btn btn--primary btn--block"
           >
             ← voltar ao dashboard
           </button>
@@ -237,55 +202,24 @@ function Users({ showAlert }) {
   }
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      backgroundColor: '#ffffff',
-      padding: '16px',
-      paddingBottom: '80px'
-    }}>
+    <div className="metro-page metro-page--with-nav">
       {/* Header Tile */}
       <MetroTile 
         color={MetroColors.blue}
-        style={{ marginBottom: '16px', cursor: 'default' }}
+        className="metro-tile-wide"
+        hoverable={false}
+        style={{ marginBottom: '16px' }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="metro-hero">
           <div style={{ flex: 1 }}>
-            <h1 style={{
-              fontFamily: 'Segoe UI, sans-serif',
-              fontSize: '3rem',
-              fontWeight: 300,
-              color: 'white',
-              margin: 0,
-              lineHeight: 1,
-              textTransform: 'lowercase',
-              letterSpacing: '-2px'
-            }}>
-              pessoas
-            </h1>
-            <p style={{
-              fontFamily: 'Segoe UI, sans-serif',
-              fontSize: '0.875rem',
-              color: 'rgba(255, 255, 255, 0.9)',
-              margin: '8px 0 0 0',
-              textTransform: 'lowercase'
-            }}>
+            <h1 className="metro-hero__title">pessoas</h1>
+            <p className="metro-hero__subtitle">
               {users.length} pessoa{users.length !== 1 ? 's' : ''} cadastrada{users.length !== 1 ? 's' : ''}
             </p>
           </div>
           <button
             onClick={() => navigate('/')}
-            style={{
-              width: '40px',
-              height: '40px',
-              backgroundColor: 'rgba(255, 255, 255, 0.2)',
-              border: 'none',
-              color: 'white',
-              fontSize: '1.25rem',
-              cursor: 'pointer',
-              transition: 'background-color 0.15s'
-            }}
-            onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'}
-            onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)'}
+            className="metro-icon-button"
           >
             ←
           </button>
@@ -293,40 +227,21 @@ function Users({ showAlert }) {
       </MetroTile>
 
       {/* Grid de Tiles */}
-      <div style={{ 
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-        gap: '16px'
-      }}>
+      <div className="metro-grid">
         {/* Tile Adicionar Nova Pessoa */}
         <MetroTile 
-          color="#e5e7eb"
+          color="var(--bg-secondary)"
+          className="metro-tile--muted"
           onClick={abrirNovo}
         >
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '100%',
-            textAlign: 'center'
-          }}>
-            <div style={{
-              fontSize: '3rem',
-              color: '#9ca3af',
-              marginBottom: '8px'
-            }}>+</div>
-            <span style={{
-              fontFamily: 'Segoe UI, sans-serif',
-              fontSize: '0.875rem',
-              color: '#6b7280',
-              textTransform: 'lowercase'
-            }}>adicionar pessoa</span>
+          <div className="metro-tile__center">
+            <div className="metro-tile__icon">+</div>
+            <span className="metro-tile__label">adicionar pessoa</span>
           </div>
         </MetroTile>
 
         {/* Tiles de Pessoas */}
-        {users.map((pessoa, index) => (
+        {users.map((pessoa) => (
           <MetroTile 
             key={pessoa.id}
             color={MetroColors.blue}
@@ -335,44 +250,19 @@ function Users({ showAlert }) {
             <div style={{
               display: 'flex',
               flexDirection: 'column',
-              height: '100%',
-              position: 'relative'
+              height: '100%'
             }}>
-              <h3 style={{
-                fontFamily: 'Segoe UI, sans-serif',
-                fontSize: '1.25rem',
-                fontWeight: 600,
-                color: 'white',
-                margin: '0 0 4px 0',
-                textTransform: 'lowercase',
-                wordBreak: 'break-word',
-                paddingRight: pessoa.is_admin ? '60px' : '0'
-              }}>
+              <h3 className="metro-tile__title" style={{ paddingRight: pessoa.is_admin ? '60px' : '0' }}>
                 {pessoa.nome.toLowerCase()}
               </h3>
 
               {pessoa.is_admin && (
-                <div style={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                  backgroundColor: 'rgba(255, 255, 255, 0.3)',
-                  padding: '4px 8px',
-                  fontSize: '0.75rem',
-                  color: 'white',
-                  textTransform: 'lowercase',
-                  fontFamily: 'Segoe UI, sans-serif'
-                }}>
+                <div className="metro-badge">
                   admin
                 </div>
               )}
               
-              <p style={{
-                fontFamily: 'Segoe UI, sans-serif',
-                fontSize: '0.75rem',
-                color: 'rgba(255, 255, 255, 0.9)',
-                margin: 0
-              }}>
+              <p className="metro-tile__meta">
                 {formatPhone(pessoa.telefone)}
               </p>
             </div>
@@ -382,50 +272,20 @@ function Users({ showAlert }) {
 
       {/* Modal */}
       {showModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 10000,
-          padding: '16px'
-        }}
-        onClick={() => setShowModal(false)}
-        >
+        <div className="metro-modal-overlay" onClick={() => setShowModal(false)}>
           <div 
-            style={{
-              backgroundColor: 'white',
-              width: '100%',
-              maxWidth: '500px',
-              maxHeight: '90vh',
-              overflow: 'auto'
-            }}
+            className="metro-modal"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div style={{
-              backgroundColor: MetroColors.blue,
-              padding: '24px',
-              color: 'white'
-            }}>
-              <h2 style={{
-                fontFamily: 'Segoe UI, sans-serif',
-                fontSize: '1.5rem',
-                fontWeight: 300,
-                margin: 0,
-                textTransform: 'lowercase'
-              }}>
+            <div className="metro-modal__header">
+              <h2 className="metro-modal__title">
                 {editando ? 'editar pessoa' : 'nova pessoa'}
               </h2>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
+            <form onSubmit={handleSubmit} className="metro-modal__body">
               <div className="form-group">
                 <label className="form-label">Nome</label>
                 <input
@@ -452,34 +312,17 @@ function Users({ showAlert }) {
               </div>
 
               <div className="form-group">
-                <label style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  cursor: 'pointer',
-                  fontFamily: 'Segoe UI, sans-serif',
-                  fontSize: '0.875rem',
-                  color: '#1f2937'
-                }}>
+                <label className="form-checkbox">
                   <input
                     type="checkbox"
                     checked={formData.is_admin}
                     onChange={(e) => setFormData({ ...formData, is_admin: e.target.checked })}
-                    style={{
-                      width: '20px',
-                      height: '20px',
-                      cursor: 'pointer'
-                    }}
                   />
                   administrador (pode gerenciar pessoas)
                 </label>
               </div>
 
-              <div style={{ 
-                display: 'flex', 
-                gap: '8px',
-                marginTop: '24px'
-              }}>
+              <div className="metro-modal__actions">
                 {editando && (
                   <button
                     type="button"
@@ -489,17 +332,7 @@ function Users({ showAlert }) {
                         setShowModal(false)
                       }
                     }}
-                    style={{
-                      flex: 1,
-                      padding: '12px',
-                      backgroundColor: MetroColors.red,
-                      color: 'white',
-                      border: 'none',
-                      fontFamily: 'Segoe UI, sans-serif',
-                      fontSize: '0.875rem',
-                      textTransform: 'lowercase',
-                      cursor: 'pointer'
-                    }}
+                    className="btn btn--danger"
                   >
                     remover
                   </button>
@@ -507,35 +340,14 @@ function Users({ showAlert }) {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  style={{
-                    flex: 1,
-                    padding: '12px',
-                    backgroundColor: '#e5e7eb',
-                    color: '#1f2937',
-                    border: 'none',
-                    fontFamily: 'Segoe UI, sans-serif',
-                    fontSize: '0.875rem',
-                    textTransform: 'lowercase',
-                    cursor: 'pointer'
-                  }}
+                  className="btn btn--ghost"
                 >
                   cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  style={{
-                    flex: 1,
-                    padding: '12px',
-                    backgroundColor: MetroColors.blue,
-                    color: 'white',
-                    border: 'none',
-                    fontFamily: 'Segoe UI, sans-serif',
-                    fontSize: '0.875rem',
-                    textTransform: 'lowercase',
-                    cursor: loading ? 'not-allowed' : 'pointer',
-                    opacity: loading ? 0.6 : 1
-                  }}
+                  className="btn btn--primary"
                 >
                   {loading ? 'salvando...' : editando ? 'atualizar' : 'criar'}
                 </button>
