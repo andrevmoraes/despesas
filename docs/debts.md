@@ -140,3 +140,26 @@ Fora do MVP. Não armazenar arquivos nem criar fluxo de anexos. As partes podem 
 8. Previsão não realizada não altera o saldo.
 9. Correção/estorno de pagamento recalcula saldo sem apagar auditoria.
 10. Usuário não relacionado à dívida não pode visualizar ou alterar seus dados.
+
+
+## 13. Integração com o acerto mensal entre pessoas
+
+**Decisão confirmada:** dívidas e compromissos recorrentes existentes devem ser integrados em um cálculo automático de saldo líquido entre as pessoas. O aplicativo sugere o valor, mas permite ajuste manual antes da confirmação (opção C).
+
+Exemplo:
+- Carol deve R$ 100 ao credor desta dívida.
+- O credor deve R$ 30 a Carol por assinaturas.
+- Saldo líquido sugerido: Carol transfere R$ 70 ao credor.
+
+**Acerto parcial — decisão confirmada:** se Carol pagar R$ 50 dos R$ 70 sugeridos, os R$ 20 restantes ficam pendentes e são carregados automaticamente para o próximo período (opção A).
+
+Cuidados obrigatórios:
+- Previsões futuras não são pagamentos realizados e não entram como dinheiro pago.
+- Ajustar o acerto não altera o valor original da dívida nem reescreve pagamentos.
+- O pagamento registrado e a compensação de obrigações precisam ser alocados de forma rastreável.
+- Não contar o mesmo pagamento/obrigação no saldo da dívida e no acerto mensal duas vezes.
+- O desenho do ledger, alocação, fechamento do período e permissões de confirmação continua pendente; não presumir uma solução técnica sem decisão.
+
+## 14. Correções e histórico — preferência ainda não finalizada
+
+Foi discutida a preferência por corrigir um pagamento incorreto por meio de estorno e novo lançamento, mantendo trilha de auditoria. A intenção de preservar o histórico está confirmada, mas o fluxo exato, permissões e efeito sobre acertos já fechados ainda precisam ser definidos.
