@@ -141,3 +141,23 @@ O sistema deve permitir criar um participante por telefone antes de a pessoa ter
 - Pagamentos alteram o saldo; previsões sozinhas não.
 - A interface deixa claro o que está pago, previsto, não realizado e pendente de decisão.
 - Dados financeiros são protegidos por autenticação real e RLS correta.
+
+
+## 9. Acerto financeiro integrado entre pessoas — decisão confirmada
+
+Dívidas e compromissos recorrentes existentes (como assinaturas) devem participar do mesmo acerto financeiro entre as pessoas. O aplicativo calcula automaticamente o saldo líquido e apresenta uma sugestão, mas permite ajuste manual antes da confirmação (**opção C escolhida**).
+
+Exemplo:
+- Carol deve R$ 100 a você por uma dívida.
+- Você deve R$ 30 a Carol pelas assinaturas.
+- O saldo líquido sugerido é R$ 70 de Carol para você.
+
+A direção do saldo deve ser explícita e correta: a pessoa que deve o maior valor transfere a diferença à outra.
+
+Se o acerto sugerir R$ 70 e Carol pagar R$ 50, os R$ 20 restantes continuam pendentes e entram automaticamente no cálculo do período seguinte (**opção A escolhida**). O acerto parcial não apaga nem altera a obrigação original.
+
+Regras:
+- Não incluir previsões futuras como se fossem pagamentos realizados.
+- Não contar a mesma obrigação ou pagamento duas vezes.
+- Ajustar o valor do acerto não altera a dívida original nem o histórico de pagamentos.
+- A regra de produto está decidida; o ledger, as alocações e o fluxo de confirmação ainda precisam ser desenhados antes da implementação.
