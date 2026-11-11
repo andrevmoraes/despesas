@@ -52,3 +52,16 @@ Ao concluir uma tarefa, informe:
 - Migrações ou configurações necessárias.
 - Testes executados.
 - Riscos ou decisões ainda pendentes.
+
+
+## Documentação canônica e continuidade
+
+Antes de qualquer tarefa de produto, consulte nesta ordem:
+1. `docs/PROJECT_CONTEXT.md` — decisões confirmadas, escopo, pendências e prompt de continuidade.
+2. `docs/product.md` e `docs/debts.md` — requisitos e regras de negócio.
+3. `docs/current-state.md` — estado técnico observado e auditoria do banco.
+4. Este arquivo (`AGENTS.md`).
+
+`REFACTORING_PLAN.md` é um plano histórico de dezembro de 2025, não prova de que as fases foram executadas nem define a arquitetura atual. Verifique o código real antes de usar suas sugestões.
+
+Não confunda o SQL versionado com o schema de produção: consulte `docs/current-state.md`. Não execute o schema inicial novamente em produção nem altere RLS sem mapear autenticação, queries e dependências atuais.
