@@ -224,3 +224,19 @@ Contribuições são bem-vindas: abra issues descrevendo o escopo e envie PRs co
 
 **Atualização do README:** se novos arquivos `.md` forem adicionados e alterarem significativamente o contexto (novas políticas de segurança, mudanças no schema, ou novos fluxos), atualize este README para refletir tais mudanças.
 
+
+
+---
+
+## Documentação de produto e continuidade
+
+A documentação canônica para decisões e continuidade do projeto está em:
+- [Contexto do projeto e decisões confirmadas](docs/PROJECT_CONTEXT.md)
+- [Regras de produto](docs/product.md)
+- [Regras de dívidas e pagamentos](docs/debts.md)
+- [Estado técnico e auditoria do banco](docs/current-state.md)
+- [Instruções para agentes](AGENTS.md)
+
+**Importante:** as instruções de setup e o schema SQL deste README refletem arquivos históricos do repositório e não devem ser usados para reaplicar o schema em produção. A auditoria de 11/11/2026 encontrou divergências entre o SQL versionado e o banco atual, além de políticas de segurança permissivas. Consulte `docs/current-state.md` antes de qualquer operação de banco ou segurança.
+
+O README descreve principalmente o MVP existente; as funcionalidades de dívidas e acerto integrado são decisões de evolução do produto e não devem ser consideradas implementadas apenas por estarem documentadas.
